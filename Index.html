@@ -1,0 +1,2870 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StudyMatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   TOKENS - DARK & PROFESSIONAL PALETTE
+═══════════════════════════════════════ */
+:root {
+  /* Rich Navy & Indigo Theme */
+  --primary:        #3B82F6; /* Bright Professional Blue */
+  --primary-dark:   #1D4ED8;
+  --primary-light:  #1E293B; /* Subtle Dark Slate Highlight */
+  --primary-grad:   linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  --accent-green:   #10B981;
+  --accent-teal:    #14B8A6;
+  --bg:             #0F172A; /* Slate 900 Deep Background */
+  --surface:        #1E293B; /* Slate 800 Surface Card */
+  --surface-hover:  #334155; /* Slate 700 Accent Surface */
+  --border:         #334155; /* Slate 700 Borders */
+  --text-1:         #F8FAFC; /* High contrast heading/primary text */
+  --text-2:         #94A3B8; /* Muted subtext */
+  --text-3:         #64748B; /* Secondary subtle text */
+  --danger:         #EF4444;
+  --warning:        #F59E0B;
+
+  /* Refined Professional Bloom Palette */
+  --b1: #94A3B8; --b1-bg: #1E293B;
+  --b2: #60A5FA; --b2-bg: #1E3A8A;
+  --b3: #34D399; --b3-bg: #064E3B;
+  --b4: #FBBF24; --b4-bg: #78350F;
+  --b5: #FB923C; --b5-bg: #7C2D12;
+  --b6: #C084FC; --b6-bg: #581C87;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.2);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,.5), 0 4px 12px rgba(0,0,0,.3);
+}
+
+/* ═══════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; background: #020617; display: flex; justify-content: center; align-items: center; overflow: hidden; color: var(--text-1); }
+
+/* ═══════════════════════════════════════
+   PHONE SHELL
+═══════════════════════════════════════ */
+#app {
+  width: min(390px, 100vw);
+  height: min(844px, 100dvh);
+  background: var(--bg);
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 0 8px #1E293B, 0 40px 80px rgba(0,0,0,.8);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Status bar */
+.status-bar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  background: transparent;
+  z-index: 10;
+}
+.status-bar.light { color: #fff; }
+.status-bar.dark  { color: var(--text-1); }
+.status-bar.transparent-light { color: #fff; position: absolute; top: 0; left: 0; right: 0; }
+.status-time { font-size: 15px; font-weight: 600; }
+.status-icons { display: flex; gap: 6px; align-items: center; }
+.status-icons svg { width: 16px; height: 12px; }
+
+/* Scrollable content area */
+.screen-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.screen-body::-webkit-scrollbar { display: none; }
+
+/* Bottom nav */
+.bottom-nav {
+  height: 72px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  flex-shrink: 0;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: background .15s;
+  min-width: 56px;
+}
+.nav-item:hover { background: var(--surface-hover); }
+.nav-item svg { width: 22px; height: 22px; }
+.nav-item span { font-size: 11px; font-weight: 500; color: var(--text-3); }
+.nav-item.active svg path, .nav-item.active svg rect, .nav-item.active svg circle { stroke: var(--primary); }
+.nav-item.active span { color: var(--primary); font-weight: 600; }
+.nav-item svg { fill: none; }
+.nav-item svg path, .nav-item svg circle, .nav-item svg rect { stroke: var(--text-3); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ═══════════════════════════════════════
+   SCREEN SYSTEM
+═══════════════════════════════════════ */
+.screen {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+}
+.screen.active { display: flex; }
+
+/* ═══════════════════════════════════════
+   COMMON COMPONENTS
+═══════════════════════════════════════ */
+.btn-primary {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; padding: 16px; border-radius: var(--radius-lg);
+  background: var(--primary-grad); color: #fff;
+  font-size: 16px; font-weight: 600; border: none; cursor: pointer;
+  transition: opacity .15s, transform .1s;
+  gap: 8px;
+}
+.btn-primary:active { opacity: .88; transform: scale(.98); }
+
+.btn-secondary {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; padding: 16px; border-radius: var(--radius-lg);
+  background: transparent; color: var(--primary);
+  font-size: 16px; font-weight: 600; border: 2px solid var(--primary);
+  cursor: pointer; transition: background .15s;
+}
+.btn-secondary:active { background: var(--surface-hover); }
+
+.btn-ghost {
+  background: none; border: none; color: var(--primary);
+  font-size: 15px; font-weight: 600; cursor: pointer; padding: 4px 8px;
+}
+
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+.input-label { font-size: 13px; font-weight: 600; color: var(--text-2); letter-spacing: .02em; }
+.input-field {
+  width: 100%; padding: 14px 16px; border-radius: var(--radius-md);
+  border: 1.5px solid var(--border); background: var(--surface);
+  font-size: 15px; font-family: 'Inter', sans-serif; color: var(--text-1);
+  outline: none; transition: border-color .15s;
+}
+.input-field:focus { border-color: var(--primary); }
+.input-field::placeholder { color: var(--text-3); }
+
+.select-field {
+  width: 100%; padding: 14px 16px; border-radius: var(--radius-md);
+  border: 1.5px solid var(--border); background: var(--surface);
+  font-size: 15px; font-family: 'Inter', sans-serif; color: var(--text-1);
+  outline: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+  background: var(--surface-hover); color: var(--primary);
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+}
+.tag .tag-remove {
+  font-size: 15px; line-height: 1; opacity: .6; cursor: pointer;
+}
+.tag.removable:hover .tag-remove { opacity: 1; }
+
+.chip {
+  display: inline-flex; align-items: center;
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 13px; font-weight: 500; border: 1.5px solid var(--border);
+  background: var(--surface); color: var(--text-2); cursor: pointer;
+  transition: all .15s;
+}
+.chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.bloom-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+
+/* Page header */
+.page-header {
+  padding: 16px 20px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.page-header h1 { font-size: 20px; font-weight: 700; color: var(--text-1); }
+.back-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg); border: 1px solid var(--border); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.back-btn svg { width: 18px; height: 18px; }
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+/* Toast */
+#toast {
+  position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
+  background: #334155; color: #fff;
+  padding: 12px 20px; border-radius: var(--radius-md);
+  font-size: 14px; font-weight: 500; z-index: 9999;
+  opacity: 0; transition: opacity .25s; pointer-events: none;
+  width: max-content; max-width: calc(100% - 40px); text-align: center;
+  box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+}
+#toast.show { opacity: 1; }
+
+/* Loading dots */
+.loading-dots { display: flex; align-items: center; gap: 6px; }
+.loading-dots span {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: currentColor; opacity: .3;
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: .2s; }
+.loading-dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes dot-pulse { 0%, 80%, 100% { opacity: .3; } 40% { opacity: 1; } }
+
+/* Progress bar */
+.progress-bar-wrap {
+  height: 6px; border-radius: 3px; background: var(--border); overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%; border-radius: 3px;
+  background: var(--accent-green);
+  transition: width .6s ease;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 1: SPLASH
+═══════════════════════════════════════ */
+#screen-splash {
+  background: linear-gradient(160deg, #0F172A 0%, #1E293B 100%);
+  align-items: center;
+  justify-content: center;
+}
+.splash-inner {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 20px;
+  animation: splash-in .8s ease both;
+}
+@keyframes splash-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.splash-icon {
+  width: 100px; height: 100px; background: var(--surface);
+  border-radius: 28px; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+}
+.splash-icon svg { width: 52px; height: 52px; }
+.splash-title { font-size: 32px; font-weight: 800; color: var(--text-1); }
+.splash-sub { font-size: 16px; color: var(--text-2); text-align: center; line-height: 1.5; }
+.splash-loading { display: flex; align-items: center; gap: 10px; color: var(--text-3); font-size: 14px; }
+.splash-footer { position: absolute; bottom: 40px; font-size: 12px; color: var(--text-3); }
+
+/* ═══════════════════════════════════════
+   SCREEN 2: ONBOARDING
+═══════════════════════════════════════ */
+#screen-onboarding {
+  background: var(--bg);
+}
+.onboarding-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; flex-shrink: 0;
+}
+.onboarding-brand { font-size: 14px; font-weight: 600; color: var(--text-2); }
+.onboarding-steps {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.onboarding-slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; transform: translateX(40px);
+  transition: all .35s ease;
+  pointer-events: none;
+}
+.onboarding-slide.active {
+  opacity: 1; transform: translateX(0);
+  pointer-events: all;
+}
+.onboarding-slide.exit {
+  opacity: 0; transform: translateX(-40px);
+}
+.onboarding-visual {
+  height: 260px;
+  border-radius: var(--radius-lg);
+  margin: 0 20px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.ob-visual-1 {
+  background: var(--primary-grad);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 0; padding: 24px;
+}
+.ob-match-card {
+  background: rgba(15, 23, 42, .4); border-radius: var(--radius-md);
+  padding: 12px 16px; width: 100%;
+  backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.1);
+}
+.ob-match-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.ob-avatars { display: flex; align-items: center; gap: 12px; }
+.ob-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+}
+.ob-arrow { color: rgba(255,255,255,.9); font-size: 18px; font-weight: 700; }
+.ob-match-subject { color: #fff; font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.ob-match-tags { color: rgba(255,255,255,.8); font-size: 13px; }
+.ob-visual-2 {
+  background: var(--surface); padding: 20px;
+  display: flex; flex-direction: column; gap: 6px;
+  border: 1px solid var(--border);
+}
+.bloom-row {
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; color: #fff;
+}
+.ob-visual-3 {
+  background: var(--primary-grad); padding: 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.ob-progress-card {
+  background: var(--surface); border-radius: var(--radius-md);
+  padding: 14px 16px; border: 1px solid var(--border);
+}
+.ob-progress-title { font-size: 14px; font-weight: 700; color: var(--text-1); margin-bottom: 2px; }
+.ob-progress-sub { font-size: 12px; color: var(--text-2); margin-bottom: 8px; }
+.ob-week { color: rgba(255,255,255,.9); font-size: 14px; font-weight: 600; }
+.ob-week-bar { height: 8px; background: rgba(255,255,255,.2); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+.ob-week-fill { height: 100%; width: 80%; background: #fff; border-radius: 4px; }
+.onboarding-text { padding: 24px 20px 16px; }
+.onboarding-text h2 { font-size: 26px; font-weight: 800; color: var(--text-1); line-height: 1.2; margin-bottom: 10px; }
+.onboarding-text p { font-size: 15px; color: var(--text-2); line-height: 1.6; }
+.onboarding-footer { padding: 16px 20px 24px; flex-shrink: 0; }
+.ob-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
+.ob-dot { width: 20px; height: 6px; border-radius: 3px; background: var(--border); transition: all .3s; }
+.ob-dot.active { width: 32px; background: var(--primary); }
+.ob-actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* ═══════════════════════════════════════
+   SCREEN 3: AUTH (Register / Login)
+═══════════════════════════════════════ */
+#screen-auth {
+  background: var(--bg);
+}
+.auth-tab-bar {
+  display: flex; border-bottom: 2px solid var(--border);
+  background: var(--surface); margin-bottom: 0; flex-shrink: 0;
+}
+.auth-tab {
+  flex: 1; padding: 14px; text-align: center;
+  font-size: 15px; font-weight: 600; color: var(--text-3);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: all .2s;
+}
+.auth-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.auth-panel { display: none; padding: 24px 20px; flex-direction: column; gap: 16px; }
+.auth-panel.active { display: flex; }
+.auth-hint { font-size: 12px; color: var(--text-3); text-align: center; line-height: 1.5; }
+.auth-check-row { display: flex; align-items: flex-start; gap: 10px; }
+.auth-check-row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--primary); margin-top: 2px; }
+.auth-check-row label { font-size: 13px; color: var(--text-2); line-height: 1.5; cursor: pointer; }
+.auth-check-row a { color: var(--primary); text-decoration: none; }
+.auth-divider { display: flex; align-items: center; gap: 12px; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.auth-divider span { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+.password-wrap { position: relative; }
+.password-wrap .input-field { padding-right: 48px; }
+.pw-toggle {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--text-3);
+  display: flex; align-items: center;
+}
+.forgot-link { text-align: right; }
+.forgot-link a { font-size: 13px; color: var(--primary); font-weight: 500; text-decoration: none; }
+
+/* ═══════════════════════════════════════
+   SCREEN 4: SETUP PROFILE
+═══════════════════════════════════════ */
+#screen-setup {
+  background: var(--bg);
+}
+.setup-header { padding: 20px 20px 8px; flex-shrink: 0; }
+.setup-header h1 { font-size: 24px; font-weight: 800; color: var(--text-1); }
+.setup-header p { font-size: 14px; color: var(--primary); font-weight: 500; margin-top: 2px; }
+.setup-body { padding: 16px 20px 100px; display: flex; flex-direction: column; gap: 20px; }
+.setup-section { background: var(--surface); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border); }
+.setup-section-title { font-size: 14px; font-weight: 700; color: var(--text-1); margin-bottom: 12px; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-add-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 20px;
+  font-size: 13px; font-weight: 500; color: var(--primary);
+  border: 1.5px dashed var(--primary); cursor: pointer;
+  background: none; font-family: 'Inter', sans-serif;
+  transition: background .15s;
+}
+.tag-add-btn:hover { background: var(--surface-hover); }
+.setup-hint { font-size: 12px; color: var(--text-3); margin-top: 8px; }
+.setup-footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 20px 28px; background: var(--bg); border-top: 1px solid var(--border); }
+
+/* ═══════════════════════════════════════
+   SCREEN 5: HOME
+═══════════════════════════════════════ */
+#screen-home {
+  background: var(--bg);
+}
+.home-hero {
+  background: var(--primary-grad);
+  padding: 20px 20px 24px;
+  flex-shrink: 0;
+}
+.home-hero-date { font-size: 13px; color: rgba(255,255,255,.75); margin-top: 2px; }
+.home-hero h1 { font-size: 24px; font-weight: 800; color: #fff; }
+.home-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 16px; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.section-title { font-size: 16px; font-weight: 700; color: var(--text-1); }
+.section-link { font-size: 13px; font-weight: 600; color: var(--primary); cursor: pointer; }
+
+.topic-card {
+  background: var(--surface); border-radius: var(--radius-md);
+  padding: 14px 16px; border: 1px solid var(--border);
+  cursor: pointer; transition: box-shadow .15s;
+  margin-bottom: 8px;
+}
+.topic-card:last-child { margin-bottom: 0; }
+.topic-card:hover { box-shadow: var(--shadow-md); background: var(--surface-hover); }
+.topic-name { font-size: 15px; font-weight: 700; color: var(--text-1); }
+.topic-meta { font-size: 12px; color: var(--text-2); margin: 2px 0 8px; }
+.topic-next { font-size: 12px; color: var(--primary); font-weight: 500; margin-top: 8px; }
+
+.match-card-home {
+  background: var(--surface); border-radius: var(--radius-md);
+  padding: 14px 16px; border: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  transition: box-shadow .15s;
+}
+.match-card-home:hover { box-shadow: var(--shadow-md); background: var(--surface-hover); }
+.match-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--surface-hover);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 18px; color: var(--primary);
+}
+.match-info { flex: 1; }
+.match-name { font-size: 15px; font-weight: 700; color: var(--text-1); }
+.match-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.match-footer { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.compat-badge {
+  padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;
+  background: var(--b3-bg); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, .2);
+}
+
+.session-card {
+  background: var(--surface); border-radius: var(--radius-md);
+  padding: 14px 16px; border: 1px solid var(--border);
+  cursor: pointer; transition: box-shadow .15s;
+}
+.session-card:hover { box-shadow: var(--shadow-md); background: var(--surface-hover); }
+.session-title { font-size: 15px; font-weight: 700; color: var(--text-1); }
+.session-meta { font-size: 13px; color: var(--text-2); margin-top: 3px; }
+.session-link { font-size: 13px; color: var(--primary); font-weight: 600; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+
+/* ═══════════════════════════════════════
+   SCREEN 6: DISCOVER
+═══════════════════════════════════════ */
+#screen-discover { background: var(--bg); }
+.discover-header { padding: 20px 20px 12px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.discover-header h1 { font-size: 22px; font-weight: 800; color: var(--text-1); }
+.discover-header p { font-size: 14px; color: var(--text-2); margin-top: 2px; }
+.discover-filters { padding: 12px 20px; display: flex; flex-direction: column; gap: 10px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.filter-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.discover-body { flex: 1; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+
+.swipe-hint { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+.swipe-hint span { font-size: 12px; color: var(--text-3); }
+
+.match-swipe-card {
+  background: var(--surface); border-radius: var(--radius-lg);
+  padding: 20px; border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+}
+.match-swipe-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.match-swipe-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--surface-hover); display: flex;
+  align-items: center; justify-content: center; font-size: 24px;
+  color: var(--primary); flex-shrink: 0;
+}
+.match-swipe-name { font-size: 17px; font-weight: 700; color: var(--text-1); }
+.match-swipe-sub { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+.match-swipe-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.match-swipe-desc { font-size: 14px; color: var(--text-2); line-height: 1.6; margin-bottom: 12px; }
+.match-swipe-avail { font-size: 13px; color: var(--text-3); }
+.match-swipe-actions { display: flex; gap: 10px; margin-top: 16px; }
+.btn-skip {
+  flex: 1; padding: 14px; border-radius: var(--radius-md);
+  border: 2px solid var(--border); background: var(--surface);
+  color: var(--text-2); font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: all .15s;
+}
+.btn-skip:hover { border-color: var(--danger); color: var(--danger); }
+.btn-connect {
+  flex: 2; padding: 14px; border-radius: var(--radius-md);
+  background: var(--primary-grad); color: #fff;
+  font-size: 15px; font-weight: 600; border: none; cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-connect:active { opacity: .88; }
+
+.also-matches { background: var(--surface); border-radius: var(--radius-md); padding: 14px 16px; border: 1px solid var(--border); }
+.also-matches-title { font-size: 13px; font-weight: 700; color: var(--text-1); margin-bottom: 8px; }
+.also-match-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.also-match-item:last-child { border-bottom: none; padding-bottom: 0; }
+.also-match-name { font-size: 14px; font-weight: 600; color: var(--text-1); }
+.also-match-sub { font-size: 12px; color: var(--text-2); }
+
+/* ═══════════════════════════════════════
+   SCREEN 7: COMMUNITIES
+═══════════════════════════════════════ */
+#screen-communities { background: var(--bg); }
+.communities-header { padding: 20px 20px 12px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.communities-header h1 { font-size: 22px; font-weight: 800; color: var(--text-1); }
+.communities-header p { font-size: 14px; color: var(--text-2); margin-top: 2px; }
+.communities-search { padding: 12px 20px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.search-field {
+  width: 100%; padding: 12px 16px 12px 40px;
+  border-radius: var(--radius-md); border: 1.5px solid var(--border);
+  background: var(--bg); font-size: 14px; font-family: 'Inter', sans-serif;
+  color: var(--text-1); outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 14px center;
+}
+.communities-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding-bottom: 16px; }
+.comm-group-title { font-size: 13px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: .06em; margin: 8px 0 6px; }
+.comm-card {
+  background: var(--surface); border-radius: var(--radius-md);
+  padding: 14px 16px; border: 1px solid var(--border);
+  cursor: pointer; transition: box-shadow .15s; margin-bottom: 6px;
+}
+.comm-card:hover { box-shadow: var(--shadow-md); background: var(--surface-hover); }
+.comm-name { font-size: 15px; font-weight: 700; color: var(--text-1); display: flex; align-items: center; gap: 8px; }
+.comm-name span.arrow { color: var(--primary); }
+.comm-desc { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+.comm-meta { font-size: 12px; color: var(--text-3); margin-top: 6px; display: flex; align-items: center; gap: 8px; }
+.online-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-green); display: inline-block; }
+.comm-create-btn { margin-top: 8px; }
+
+/* ═══════════════════════════════════════
+   SCREEN 8: COMMUNITY DETAIL
+═══════════════════════════════════════ */
+#screen-community-detail { background: var(--bg); }
+.comm-detail-header { background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.comm-detail-top { display: flex; align-items: center; gap: 10px; padding: 14px 20px 0; }
+.comm-detail-top h1 { font-size: 20px; font-weight: 800; color: var(--text-1); }
+.comm-detail-meta { font-size: 13px; color: var(--text-2); padding: 4px 20px 0; display: flex; align-items: center; gap: 8px; }
+.comm-detail-desc { font-size: 14px; color: var(--text-2); padding: 8px 20px 12px; line-height: 1.5; }
+.comm-tabs { display: flex; border-top: 1px solid var(--border); }
+.comm-tab { flex: 1; padding: 12px; text-align: center; font-size: 14px; font-weight: 500; color: var(--text-3); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; }
+.comm-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.comm-detail-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-bottom: 80px; }
+.bloom-filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.bloom-filter-btn {
+  padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  border: none; cursor: pointer; color: #fff; transition: opacity .15s;
+}
+.bloom-filter-btn:not(.bf-active) { opacity: .45; }
+.topic-item {
+  background: var(--surface); border-radius: var(--radius-md);
+  padding: 14px 16px; border: 1px solid var(--border); cursor: pointer;
+  transition: box-shadow .15s;
+}
+.topic-item:hover { box-shadow: var(--shadow-md); background: var(--surface-hover); }
+.topic-item-name { font-size: 15px; font-weight: 700; color: var(--text-1); display: flex; align-items: center; gap: 6px; }
+.topic-item-meta { font-size: 12px; color: var(--text-2); margin: 4px 0 6px; }
+.topic-item-desc { font-size: 13px; color: var(--text-2); }
+.topic-item-stats { font-size: 12px; color: var(--text-3); margin-top: 6px; }
+.comm-publish-btn { position: absolute; bottom: 80px; left: 20px; right: 20px; }
+
+/* ═══════════════════════════════════════
+   SCREEN 9: LEARNING PATH (BLOOM)
+═══════════════════════════════════════ */
+#screen-learning-path { background: var(--bg); }
+.lp-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; flex-shrink: 0; }
+.lp-header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
+.lp-header h1 { font-size: 20px; font-weight: 800; color: var(--text-1); }
+.lp-header p { font-size: 13px; color: var(--text-2); }
+.lp-header-progress { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+.lp-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-bottom: 100px; }
+.bloom-step {
+  background: var(--surface); border-radius: var(--radius-md);
+  padding: 14px 16px; border: 1.5px solid var(--border);
+  display: flex; align-items: center; gap: 14px; cursor: pointer;
+  transition: all .15s;
+}
+.bloom-step.completed { border-color: var(--accent-green); }
+.bloom-step.current { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+.bloom-step.locked { opacity: .5; cursor: default; }
+.bloom-step-num {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.bloom-step-info { flex: 1; }
+.bloom-step-name { font-size: 15px; font-weight: 700; color: var(--text-1); }
+.bloom-step-sub { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+.bloom-step-status { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.lp-footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 20px 28px; background: var(--bg); border-top: 1px solid var(--border); }
+
+/* ═══════════════════════════════════════
+   SCREEN 10: CHAT LIST
+═══════════════════════════════════════ */
+#screen-chats { background: var(--bg); }
+.chats-header { padding: 20px 20px 12px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.chats-header h1 { font-size: 22px; font-weight: 800; color: var(--text-1); }
+.chats-header p { font-size: 14px; color: var(--text-2); margin-top: 2px; }
+.chats-search-wrap { padding: 12px 20px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.chats-filter { padding: 10px 20px; display: flex; gap: 8px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.chats-body { padding: 8px 0; overflow-y: auto; }
+.chat-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; cursor: pointer; transition: background .15s;
+  border-bottom: 1px solid var(--border);
+}
+.chat-item:hover { background: var(--surface); }
+.chat-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--surface-hover); display: flex; align-items: center;
+  justify-content: center; font-size: 20px; color: var(--primary); flex-shrink: 0; position: relative;
+}
+.chat-online-indicator { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-green); border: 2px solid var(--surface); }
+.chat-info { flex: 1; min-width: 0; }
+.chat-name { font-size: 15px; font-weight: 700; color: var(--text-1); }
+.chat-preview { font-size: 13px; color: var(--text-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.chat-time { font-size: 12px; color: var(--text-3); }
+.chat-unread { background: var(--primary); color: #fff; border-radius: 20px; padding: 2px 8px; font-size: 12px; font-weight: 700; min-width: 20px; text-align: center; }
+.new-chat-btn { padding: 12px 20px; }
+
+/* ═══════════════════════════════════════
+   SCREEN 11: CHAT DETAIL
+═══════════════════════════════════════ */
+#screen-chat-detail { background: var(--bg); }
+.chat-detail-header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.chat-detail-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--surface-hover); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--primary); }
+.chat-detail-name { font-size: 16px; font-weight: 700; color: var(--text-1); }
+.chat-detail-status { font-size: 12px; color: var(--accent-green); font-weight: 500; margin-top: 1px; }
+.chat-detail-actions { margin-left: auto; display: flex; gap: 8px; }
+.chat-detail-action { width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.messages-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.msg-date-sep { text-align: center; font-size: 12px; color: var(--text-3); font-weight: 500; margin: 4px 0; }
+.message { max-width: 80%; }
+.message.received { align-self: flex-start; }
+.message.sent { align-self: flex-end; }
+.msg-bubble {
+  padding: 10px 14px; border-radius: var(--radius-md);
+  font-size: 14px; line-height: 1.5;
+}
+.message.received .msg-bubble {
+  background: var(--surface); color: var(--text-1);
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+}
+.message.sent .msg-bubble {
+  background: var(--primary-grad); color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.msg-time { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+.message.sent .msg-time { text-align: right; }
+.msg-time.read { color: var(--primary); }
+.session-embed-card {
+  background: var(--surface); border-radius: var(--radius-md);
+  padding: 14px; border: 1px solid var(--border); border-left: 3px solid var(--primary);
+  cursor: pointer;
+}
+.session-embed-title { font-size: 14px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+.session-embed-meta { font-size: 12px; color: var(--text-2); }
+.session-embed-link { font-size: 13px; color: var(--primary); font-weight: 600; margin-top: 8px; }
+.chat-input-bar {
+  padding: 12px 16px; background: var(--surface);
+  border-top: 1px solid var(--border); display: flex; gap: 10px;
+  align-items: flex-end; flex-shrink: 0;
+}
+.chat-input {
+  flex: 1; padding: 12px 16px; border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border); background: var(--bg);
+  font-size: 14px; font-family: 'Inter', sans-serif;
+  resize: none; outline: none; max-height: 100px; color: var(--text-1);
+  transition: border-color .15s;
+}
+.chat-input:focus { border-color: var(--primary); }
+.send-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--primary-grad); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.send-btn svg { width: 18px; height: 18px; }
+.send-btn svg path { stroke: #fff; fill: none; }
+
+/* ═══════════════════════════════════════
+   SCREEN 12: STUDY SESSION
+═══════════════════════════════════════ */
+#screen-session { background: var(--bg); }
+.session-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; flex-shrink: 0; }
+.session-header-top { display: flex; align-items: center; gap: 10px; }
+.session-header h1 { font-size: 18px; font-weight: 800; color: var(--text-1); }
+.session-header p { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+.session-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; padding-bottom: 24px; }
+.timer-card { background: var(--surface); border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--border); text-align: center; }
+.timer-bloom-badge { display: inline-flex; margin-bottom: 12px; }
+.timer-display { font-size: 52px; font-weight: 800; color: var(--text-1); font-variant-numeric: tabular-nums; letter-spacing: -2px; }
+.timer-meta { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+.timer-controls { display: flex; gap: 10px; margin-top: 16px; }
+.btn-timer-pause {
+  flex: 1; padding: 14px; border-radius: var(--radius-md);
+  border: 2px solid var(--border); background: var(--surface);
+  font-size: 15px; font-weight: 600; color: var(--text-1); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all .15s;
+}
+.btn-timer-pause.paused { border-color: var(--primary); color: var(--primary); background: var(--surface-hover); }
+.checklist-card { background: var(--surface); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border); }
+.checklist-title { font-size: 14px; font-weight: 700; color: var(--text-1); margin-bottom: 12px; }
+.check-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.check-item:last-child { border-bottom: none; padding-bottom: 0; }
+.check-box {
+  width: 22px; height: 22px; border-radius: 6px;
+  border: 2px solid var(--border); display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; transition: all .15s;
+  margin-top: 1px;
+}
+.check-box.checked { background: var(--accent-green); border-color: var(--accent-green); }
+.check-text { font-size: 14px; color: var(--text-1); line-height: 1.4; }
+.check-text.done { text-decoration: line-through; color: var(--text-3); }
+.notes-card { background: var(--surface); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border); }
+.notes-title { font-size: 14px; font-weight: 700; color: var(--text-1); margin-bottom: 10px; }
+.notes-content { font-size: 14px; color: var(--text-1); line-height: 1.6; font-family: 'Inter', sans-serif; }
+.notes-typing { font-size: 12px; color: var(--text-3); margin-top: 8px; }
+.notes-edit-btn { font-size: 13px; color: var(--primary); cursor: pointer; font-weight: 500; }
+.session-actions { display: flex; gap: 10px; }
+.btn-open-chat { flex: 1; padding: 14px; border-radius: var(--radius-md); border: 2px solid var(--primary); background: var(--surface); color: var(--primary); font-size: 15px; font-weight: 600; cursor: pointer; }
+.btn-end-session { flex: 2; padding: 14px; border-radius: var(--radius-md); background: var(--primary-grad); color: #fff; font-size: 15px; font-weight: 600; border: none; cursor: pointer; }
+
+/* ═══════════════════════════════════════
+   SCREEN 13: PROGRESS
+═══════════════════════════════════════ */
+#screen-progress { background: var(--bg); }
+.progress-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; padding-bottom: 16px; }
+.progress-period { display: flex; gap: 8px; }
+.period-btn { padding: 8px 20px; border-radius: var(--radius-md); border: 1.5px solid var(--border); background: var(--surface); font-size: 14px; font-weight: 600; color: var(--text-2); cursor: pointer; transition: all .15s; }
+.period-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.stat-card-big { background: var(--surface); border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--border); }
+.stat-big-num { font-size: 44px; font-weight: 800; color: var(--text-1); letter-spacing: -2px; }
+.stat-big-unit { font-size: 18px; color: var(--text-2); }
+.stat-big-label { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+.stat-big-meta { font-size: 13px; color: var(--accent-green); font-weight: 600; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+.bloom-progress-section { background: var(--surface); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border); }
+.bloom-progress-title { font-size: 15px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+.bloom-progress-sub { font-size: 12px; color: var(--text-2); margin-bottom: 14px; }
+.bloom-row-progress { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.bloom-row-progress:last-child { margin-bottom: 0; }
+.bloom-row-label { font-size: 13px; font-weight: 500; color: var(--text-2); width: 100px; flex-shrink: 0; }
+.bloom-bar-wrap { flex: 1; height: 8px; border-radius: 4px; background: var(--bg); overflow: hidden; }
+.bloom-bar-fill { height: 100%; border-radius: 4px; transition: width .8s ease; }
+.bloom-row-val { font-size: 13px; font-weight: 700; color: var(--text-1); width: 16px; text-align: right; }
+.badges-section { background: var(--surface); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border); }
+.badges-title { font-size: 15px; font-weight: 700; color: var(--text-1); margin-bottom: 12px; }
+.badge-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.badge-item:last-child { border-bottom: none; padding-bottom: 0; }
+.badge-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--surface-hover); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--primary); }
+.badge-name { font-size: 14px; font-weight: 600; color: var(--text-1); }
+.badge-desc { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.progress-next-goal { background: var(--surface-hover); border-radius: var(--radius-md); padding: 14px 16px; border: 1px solid var(--border); }
+.progress-next-goal p { font-size: 14px; color: var(--primary); font-weight: 500; }
+
+/* ═══════════════════════════════════════
+   SCREEN 14: PROFILE
+═══════════════════════════════════════ */
+#screen-profile { background: var(--bg); }
+.profile-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px; flex-shrink: 0; }
+.profile-header h1 { font-size: 22px; font-weight: 800; color: var(--text-1); }
+.profile-header p { font-size: 14px; color: var(--text-2); margin-top: 2px; }
+.profile-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-bottom: 16px; }
+.profile-card { background: var(--surface); border-radius: var(--radius-md); padding: 16px; border: 1px solid var(--border); }
+.profile-user-row { display: flex; align-items: center; gap: 14px; }
+.profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--surface-hover); display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--primary); flex-shrink: 0; }
+.profile-user-name { font-size: 18px; font-weight: 800; color: var(--text-1); }
+.profile-user-sub { font-size: 14px; color: var(--text-2); margin-top: 2px; }
+.profile-user-sem { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+.profile-section-label { font-size: 13px; font-weight: 700; color: var(--text-2); margin-bottom: 8px; }
+.profile-stats-row { display: flex; gap: 8px; margin-top: 4px; }
+.profile-stat { flex: 1; background: var(--bg); border-radius: var(--radius-sm); padding: 10px; text-align: center; border: 1px solid var(--border); }
+.profile-stat-val { font-size: 16px; font-weight: 800; color: var(--text-1); }
+.profile-stat-label { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+.profile-info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.profile-info-row:last-child { border-bottom: none; }
+.profile-info-key { font-size: 13px; color: var(--text-2); }
+.profile-info-val { font-size: 13px; color: var(--text-1); font-weight: 500; text-align: right; max-width: 55%; }
+.settings-list a, .settings-list button { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); cursor: pointer; background: none; border-top: none; border-left: none; border-right: none; width: 100%; font-family: 'Inter', sans-serif; text-decoration: none; }
+.settings-list > *:last-child { border-bottom: none; }
+.settings-item-label { font-size: 15px; color: var(--text-1); }
+.settings-item-val { font-size: 14px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+.toggle {
+  width: 44px; height: 24px; border-radius: 12px; background: var(--border);
+  position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0;
+}
+.toggle.on { background: var(--accent-green); }
+.toggle::after {
+  content: ''; position: absolute; width: 20px; height: 20px;
+  border-radius: 50%; background: #fff; top: 2px; left: 2px;
+  transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.15);
+}
+.toggle.on::after { transform: translateX(20px); }
+.logout-btn { color: var(--danger) !important; }
+.logout-btn .settings-item-label { color: var(--danger); }
+
+/* ═══════════════════════════════════════
+   MODALS
+═══════════════════════════════════════ */
+.modal-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,.7);
+  display: none; align-items: flex-end; z-index: 100;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.show { display: flex; }
+.modal-sheet {
+  width: 100%; background: var(--surface);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: 20px 20px 36px;
+  animation: sheet-up .3s ease;
+  max-height: 85%;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+}
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 40px; height: 4px; border-radius: 2px; background: var(--border); margin: 0 auto 16px; }
+.modal-title { font-size: 18px; font-weight: 700; color: var(--text-1); margin-bottom: 16px; }
+.modal-option {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid var(--border); cursor: pointer;
+}
+.modal-option:last-child { border-bottom: none; }
+.modal-option-label { font-size: 15px; color: var(--text-1); }
+.modal-option-check { color: var(--primary); font-size: 18px; }
+
+/* ═══════════════════════════════════════
+   SESSION END MODAL
+═══════════════════════════════════════ */
+.session-end-modal { padding: 20px; }
+.session-end-title { font-size: 22px; font-weight: 800; color: var(--text-1); text-align: center; margin-bottom: 6px; }
+.session-end-sub { font-size: 15px; color: var(--text-2); text-align: center; margin-bottom: 20px; }
+.session-end-stats { display: flex; gap: 12px; margin-bottom: 20px; }
+.session-end-stat { flex: 1; background: var(--bg); border-radius: var(--radius-md); padding: 14px; text-align: center; border: 1px solid var(--border); }
+.session-end-stat-val { font-size: 22px; font-weight: 800; color: var(--primary); }
+.session-end-stat-label { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.rating-section { margin-bottom: 20px; }
+.rating-title { font-size: 14px; font-weight: 600; color: var(--text-2); margin-bottom: 10px; }
+.stars { display: flex; gap: 8px; }
+.star { font-size: 28px; cursor: pointer; opacity: .35; transition: opacity .15s; }
+.star.active { opacity: 1; }
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slide-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: slide-up .35s ease both; }
+
+/* Transition overlay */
+#transition-overlay {
+  position: absolute; inset: 0; background: var(--bg);
+  z-index: 50; pointer-events: none;
+  opacity: 0; transition: opacity .2s;
+}
+#transition-overlay.show { opacity: 1; }
+@media (max-width:430px), (max-height:700px) { #app { border-radius: 0; box-shadow: none; } }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Transition overlay -->
+  <div id="transition-overlay"></div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- ═══════════════════════ SCREEN: SPLASH ═══════════════════════ -->
+  <div class="screen active" id="screen-splash">
+    <div class="splash-inner" style="position:relative;z-index:1;">
+      <div class="splash-icon">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 10C8 8.343 9.343 7 11 7H41C42.657 7 44 8.343 44 10V34C44 35.657 42.657 37 41 37H28L18 45V37H11C9.343 37 8 35.657 8 34V10Z" stroke="#3B82F6" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M16 20H36M16 27H28" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div style="text-align:center;">
+        <div class="splash-title">StudyMatch</div>
+        <div class="splash-sub" style="margin-top:8px;">Aprende en comunidad.<br>Avanza a tu ritmo.</div>
+      </div>
+      <div class="splash-loading">
+        <div class="loading-dots" style="color:var(--text-3)">
+          <span></span><span></span><span></span>
+        </div>
+        <span>Cargando...</span>
+      </div>
+    </div>
+    <div class="splash-footer">Comunidad estudiantil · Tutoría entre pares</div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: ONBOARDING ═══════════════════════ -->
+  <div class="screen" id="screen-onboarding">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="onboarding-header">
+        <span class="onboarding-brand">StudyMatch · Bienvenida</span>
+        <button class="btn-ghost" onclick="goTo('auth')">Omitir</button>
+      </div>
+
+      <div class="onboarding-steps" style="flex:1;overflow:hidden;position:relative;">
+        <!-- Slide 1 -->
+        <div class="onboarding-slide active" id="ob-slide-0" style="padding:0 0 16px;">
+          <div class="onboarding-visual ob-visual-1">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:14px;">
+              <div class="ob-avatar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="rgba(255,255,255,.8)" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="rgba(255,255,255,.8)" stroke-width="2" stroke-linecap="round"/></svg></div>
+              <span class="ob-arrow">⟷</span>
+              <div class="ob-avatar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="rgba(255,255,255,.8)" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="rgba(255,255,255,.8)" stroke-width="2" stroke-linecap="round"/></svg></div>
+            </div>
+            <div class="ob-match-card">
+              <div class="ob-match-subject">Cálculo I</div>
+              <div class="ob-match-tags" style="display:flex;gap:8px;font-size:12px;">
+                <span style="background:rgba(255,255,255,.1);padding:3px 10px;border-radius:20px;color:#fff;">Intereses en común</span>
+                <span style="background:rgba(255,255,255,.1);padding:3px 10px;border-radius:20px;color:#fff;">Horarios compatibles</span>
+              </div>
+            </div>
+          </div>
+          <div class="onboarding-text">
+            <h2>Encuentra con quién estudiar</h2>
+            <p>Conecta con estudiantes que comparten tus materias. Aprende de otros y comparte lo que sabes.</p>
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="onboarding-slide" id="ob-slide-1" style="padding:0 0 16px;">
+          <div class="onboarding-visual ob-visual-2">
+            <div class="bloom-row" style="background:var(--b1)">1 Recordar</div>
+            <div class="bloom-row" style="background:var(--b2)">2 Comprender</div>
+            <div class="bloom-row" style="background:var(--b3)">3 Aplicar</div>
+            <div class="bloom-row" style="background:var(--b4)">4 Analizar</div>
+            <div class="bloom-row" style="background:var(--b5)">5 Evaluar</div>
+            <div class="bloom-row" style="background:var(--b6)">6 Crear</div>
+          </div>
+          <div class="onboarding-text">
+            <h2>Aprende, paso a paso</h2>
+            <p>De recordar conceptos a crear proyectos: los seis niveles de Bloom te guían hacia una comprensión más profunda.</p>
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="onboarding-slide" id="ob-slide-2" style="padding:0 0 16px;">
+          <div class="onboarding-visual ob-visual-3">
+            <div class="ob-progress-card">
+              <div class="ob-progress-title">Derivadas · Cálculo I</div>
+              <div class="ob-progress-sub">3 Aplicar · 3 de 6 niveles</div>
+              <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:50%"></div></div>
+              <div style="font-size:12px;color:var(--primary);font-weight:500;margin-top:8px;">Siguiente: resolver 5 ejercicios →</div>
+            </div>
+            <div>
+              <div class="ob-week">Esta semana · 4 h de estudio</div>
+              <div class="ob-week-bar"><div class="ob-week-fill"></div></div>
+              <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:6px;">Una sesión a la vez, un nivel más cerca.</div>
+            </div>
+          </div>
+          <div class="onboarding-text">
+            <h2>Haz visible tu progreso</h2>
+            <p>Registra tus sesiones, alcanza nuevos niveles y reconoce todo lo que has aprendido con tu comunidad.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="onboarding-footer">
+        <div class="ob-dots">
+          <div class="ob-dot active" id="ob-dot-0"></div>
+          <div class="ob-dot" id="ob-dot-1"></div>
+          <div class="ob-dot" id="ob-dot-2"></div>
+        </div>
+        <div class="ob-actions" id="ob-actions-next">
+          <button class="btn-primary" onclick="nextSlide()">Siguiente</button>
+        </div>
+        <div class="ob-actions" id="ob-actions-final" style="display:none;">
+          <button class="btn-primary" onclick="goTo('auth')">Crear mi cuenta</button>
+          <button class="btn-secondary" onclick="goTo('auth')">Ya tengo cuenta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: AUTH ═══════════════════════ -->
+  <div class="screen" id="screen-auth">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div>
+        <div style="font-size:20px;font-weight:800;color:var(--text-1)" id="auth-title">Crea tu cuenta</div>
+        <div style="font-size:13px;color:var(--text-2);margin-top:2px" id="auth-sub">StudyMatch · Empieza tu comunidad</div>
+      </div>
+    </div>
+    <div class="auth-tab-bar">
+      <div class="auth-tab active" id="tab-register" onclick="switchAuthTab('register')">Registrarse</div>
+      <div class="auth-tab" id="tab-login" onclick="switchAuthTab('login')">Iniciar sesión</div>
+    </div>
+    <div class="screen-body">
+      <!-- Register panel -->
+      <div class="auth-panel active" id="panel-register">
+        <div class="input-group">
+          <label class="input-label">Nombre completo</label>
+          <input class="input-field" id="reg-name" type="text" placeholder="Orianna Silva" autocomplete="name">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Correo universitario</label>
+          <input class="input-field" id="reg-email" type="email" placeholder="ori.silva@uni.co" autocomplete="email">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Universidad</label>
+          <select class="select-field" id="reg-uni">
+            <option value="">Selecciona tu universidad</option>
+            <option>Universidad Nacional de Colombia</option>
+            <option>UNAM</option>
+            <option>Universidad Agustiniana</option>
+            <option>Universidad de los Andes</option>
+            <option>Pontificia Universidad Javeriana</option>
+            <option>Universidad del Rosario</option>
+            <option>UNI</option>
+            <option>Otra</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Contraseña</label>
+          <div class="password-wrap">
+            <input class="input-field" id="reg-pass" type="password" placeholder="Mínimo 8 caracteres">
+            <button type="button" aria-label="Mostrar u ocultar contraseña" class="pw-toggle" onclick="togglePw('reg-pass', this)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div style="font-size:12px;color:var(--text-3)">Mínimo 8 caracteres, una letra y un número.</div>
+        </div>
+        <div class="auth-check-row">
+          <input type="checkbox" id="reg-terms">
+          <label for="reg-terms">Acepto los <a href="#" onclick="event.preventDefault()">términos de uso</a> y la <a href="#" onclick="event.preventDefault()">política de privacidad</a>.</label>
+        </div>
+        <button class="btn-primary" onclick="doRegister()">Registrarme</button>
+        <div class="auth-divider"><span>¿Ya tienes cuenta?</span></div>
+        <button class="btn-secondary" onclick="switchAuthTab('login')">Ya tengo cuenta · Iniciar sesión</button>
+        <div class="auth-hint">Tu correo ayuda a verificar tu comunidad universitaria.</div>
+      </div>
+
+      <!-- Login panel -->
+      <div class="auth-panel" id="panel-login">
+        <div style="margin-bottom:4px;">
+          <div style="font-size:22px;font-weight:800;color:var(--text-1)">Bienvenido de nuevo</div>
+          <div style="font-size:14px;color:var(--primary);margin-top:2px;">Inicia sesión en StudyMatch</div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Correo universitario</label>
+          <input class="input-field" id="login-email" type="email" placeholder="ori.silva@uni.co" autocomplete="email">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Contraseña</label>
+          <div class="password-wrap">
+            <input class="input-field" id="login-pass" type="password" placeholder="••••••••">
+            <button type="button" aria-label="Mostrar u ocultar contraseña" class="pw-toggle" onclick="togglePw('login-pass', this)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Universidad</label>
+          <select class="select-field" id="login-uni">
+            <option>Universidad Agustiniana</option>
+            <option>Universidad Nacional de Colombia</option>
+            <option>UNAM</option>
+            <option>Universidad de los Andes</option>
+            <option>UNI</option>
+          </select>
+        </div>
+        <div class="forgot-link"><a href="#" onclick="event.preventDefault();showToast('Revisa tu correo para recuperar la contraseña.')">Olvidé mi contraseña →</a></div>
+        <button class="btn-primary" onclick="doLogin()">Iniciar sesión</button>
+        <button class="btn-secondary" onclick="switchAuthTab('register')">Crear una cuenta</button>
+        <div class="card" style="text-align:center;background:var(--surface);border-color:var(--border);">
+          <div style="font-size:14px;font-weight:600;color:var(--primary);margin-bottom:4px;">Tu comunidad te espera</div>
+          <div style="font-size:13px;color:var(--text-2);">Retoma tus temas y tus próximas sesiones de estudio.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: SETUP PROFILE ═══════════════════════ -->
+  <div class="screen" id="screen-setup">
+    <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:20px 20px 16px;flex-shrink:0;">
+      <div style="font-size:24px;font-weight:800;color:var(--text-1)">Configura tu perfil</div>
+      <div style="font-size:14px;color:var(--primary);font-weight:500;margin-top:4px;">Te conectamos según tus intereses</div>
+    </div>
+    <div class="screen-body" style="padding:16px 20px 120px;">
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="input-group">
+          <label class="input-label">Carrera</label>
+          <select class="select-field" id="setup-career">
+            <option>Ingeniería en Computación</option>
+            <option>Ingeniería Civil</option>
+            <option>Medicina</option>
+            <option>Derecho</option>
+            <option>Administración de Empresas</option>
+            <option>Psicología</option>
+            <option>Matemáticas</option>
+            <option>Física</option>
+            <option>Otra</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Semestre</label>
+          <select class="select-field" id="setup-semester">
+            <option>1.º semestre</option><option>2.º semestre</option>
+            <option selected>3.º semestre</option><option>4.º semestre</option>
+            <option>5.º semestre</option><option>6.º semestre</option>
+            <option>7.º semestre</option><option>8.º semestre</option>
+            <option>9.º semestre</option><option>10.º semestre</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Materias de interés</label>
+          <select class="select-field" id="setup-subject-select" onchange="addSubjectTag()">
+            <option value="">+ Añadir materia</option>
+            <option>Cálculo I</option><option>Cálculo II</option>
+            <option>Álgebra lineal</option><option>Programación I</option>
+            <option>Física I</option><option>Estadística</option>
+            <option>Química General</option><option>Biología</option>
+            <option>Economía</option><option>Contabilidad</option>
+          </select>
+          <div class="tag-list" id="subjects-tag-list" style="margin-top:8px;">
+            <span class="tag removable" data-val="Cálculo I">Cálculo I <span class="tag-remove" onclick="removeTag(this,'subjects-tag-list','Cálculo I')">×</span></span>
+            <span class="tag removable" data-val="Álgebra lineal">Álgebra lineal <span class="tag-remove" onclick="removeTag(this,'subjects-tag-list','Álgebra lineal')">×</span></span>
+          </div>
+        </div>
+
+        <div class="setup-section">
+          <div class="setup-section-title">Fortalezas · Puedo enseñar</div>
+          <div class="tag-list" id="strengths-tag-list">
+            <span class="tag removable" data-val="Límites">Límites <span class="tag-remove" onclick="removeTag(this,'strengths-tag-list','Límites')">×</span></span>
+            <span class="tag removable" data-val="Programación">Programación <span class="tag-remove" onclick="removeTag(this,'strengths-tag-list','Programación')">×</span></span>
+            <button class="tag-add-btn" onclick="openAddTag('strengths-tag-list','fortaleza')">+ Añadir fortaleza</button>
+          </div>
+        </div>
+
+        <div class="setup-section">
+          <div class="setup-section-title">Necesidades · Quiero aprender</div>
+          <div class="tag-list" id="needs-tag-list">
+            <span class="tag removable" data-val="Derivadas">Derivadas <span class="tag-remove" onclick="removeTag(this,'needs-tag-list','Derivadas')">×</span></span>
+            <span class="tag removable" data-val="Matrices">Matrices <span class="tag-remove" onclick="removeTag(this,'needs-tag-list','Matrices')">×</span></span>
+            <button class="tag-add-btn" onclick="openAddTag('needs-tag-list','necesidad')">+ Añadir necesidad</button>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Disponibilidad</label>
+          <select class="select-field" id="setup-avail">
+            <option>Mar. y jue. · 16:00–18:00</option>
+            <option>Lun. y mié. · 8:00–10:00</option>
+            <option>Vie. · 14:00–17:00</option>
+            <option>Sáb. · 10:00–13:00</option>
+            <option>Lun., mié. y vie. · 12:00–14:00</option>
+          </select>
+          <div class="setup-hint">Podrás cambiar estas preferencias en tu perfil.</div>
+        </div>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:16px 20px 32px;background:linear-gradient(to top, var(--bg) 80%, transparent);">
+      <button class="btn-primary" onclick="doSetupProfile()">Guardar y empezar</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: HOME ═══════════════════════ -->
+  <div class="screen" id="screen-home">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div style="background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+        <div class="home-hero" style="border-radius:0;padding-top:32px;">
+          <h1 id="home-greeting">Hola, Ori</h1>
+          <div class="home-hero-date" id="home-date">Jueves 8 de octubre · UNI</div>
+        </div>
+      </div>
+      <div class="screen-body">
+        <div class="home-body">
+          <!-- Active topics -->
+          <div>
+            <div class="section-header">
+              <span class="section-title">Mis temas activos</span>
+              <span class="section-link" onclick="goTo('progress')">Progreso →</span>
+            </div>
+            <div class="topic-card" onclick="goTo('learning-path')">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div class="topic-name">Derivadas · Cálculo I</div>
+                <div class="bloom-badge" style="background:var(--b3-bg);color:var(--b3);font-size:11px;">3 Aplicar</div>
+              </div>
+              <div class="topic-meta">3 de 6 niveles</div>
+              <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:50%"></div></div>
+              <div class="topic-next">Siguiente: resolver 5 ejercicios →</div>
+            </div>
+            <div class="topic-card" onclick="goTo('learning-path')">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div class="topic-name">Matrices · Álgebra lineal</div>
+                <div class="bloom-badge" style="background:var(--b1-bg);color:var(--b1);font-size:11px;">1 Recordar</div>
+              </div>
+              <div class="topic-meta">1 de 6 niveles</div>
+              <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:16%;background:var(--b1)"></div></div>
+            </div>
+          </div>
+
+          <!-- Suggested matches -->
+          <div>
+            <div class="section-header">
+              <span class="section-title">Matches sugeridos</span>
+              <span class="section-link" onclick="goTo('discover')">Ver todos →</span>
+            </div>
+            <div class="match-card-home" onclick="goTo('discover')">
+              <div class="match-avatar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div class="match-info">
+                <div class="match-name">Lucía Torres</div>
+                <div class="match-sub">Ingeniería · UNI · 4.º semestre</div>
+                <div class="match-footer">
+                  <span class="chip" style="font-size:12px;padding:3px 10px;">Cálculo I</span>
+                  <span class="compat-badge">92% compatible</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Next session -->
+          <div>
+            <div class="section-header">
+              <span class="section-title">Próxima sesión</span>
+            </div>
+            <div class="session-card" onclick="goTo('session')">
+              <div class="session-title">Derivadas con Lucía</div>
+              <div class="session-meta">Hoy · 16:00–16:45 · En línea</div>
+              <div class="session-link">Preparar ejercicios →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav" id="home-nav">
+        <div class="nav-item active" onclick="goTo('home')">
+          <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+          <span>Inicio</span>
+        </div>
+        <div class="nav-item" onclick="goTo('discover')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7"/><path d="M15 17l2 2 4-4"/></svg>
+          <span>Descubrir</span>
+        </div>
+        <div class="nav-item" onclick="goTo('communities')">
+          <svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 012-2h14M4 19a2 2 0 002 2h14M4 19h14a2 2 0 002-2V9M18 3v6"/></svg><span>Comunidades</span>
+        </div>
+        <div class="nav-item" onclick="goTo('chats')">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <span>Chat</span>
+        </div>
+        <div class="nav-item" onclick="goTo('profile')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <span>Perfil</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: DISCOVER ═══════════════════════ -->
+  <div class="screen" id="screen-discover">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="discover-header">
+        <h1>Descubrir</h1>
+        <p>Compañeros y tutores para ti</p>
+      </div>
+      <div class="discover-filters">
+        <div class="input-group" style="margin-bottom:0;">
+          <label class="input-label">Buscar por materia</label>
+          <select class="select-field" id="discover-subject" onchange="filterDiscoverMatches()">
+            <option>Cálculo I</option><option>Álgebra lineal</option>
+            <option>Programación I</option><option>Física I</option><option>Todas</option>
+          </select>
+        </div>
+        <div class="filter-chips">
+          <div class="chip active" onclick="filterDiscover(this,'all')">Todos</div>
+          <div class="chip" onclick="filterDiscover(this,'peer')">Compañeros</div>
+          <div class="chip" onclick="filterDiscover(this,'tutor')">Tutores</div>
+        </div>
+      </div>
+      <div class="discover-body" id="discover-body">
+        <div class="swipe-hint">
+          <span>← Omitir</span>
+          <span>Desliza para explorar</span>
+          <span>Conectar →</span>
+        </div>
+        <!-- Main card shown dynamically -->
+        <div id="discover-main-card"></div>
+        <div id="discover-also-matches"></div>
+        <div id="discover-empty" style="display:none;text-align:center;padding:40px 20px;">
+          <div style="font-size:32px;margin-bottom:12px;color:var(--primary);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div style="font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:8px;">¡Exploraste todos los matches!</div>
+          <div style="font-size:14px;color:var(--text-2);">Cambia los filtros para ver más compañeros, o espera a que lleguen nuevos.</div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="goTo('home')"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg><span>Inicio</span></div>
+        <div class="nav-item active" onclick="goTo('discover')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7"/><path d="M15 17l2 2 4-4"/></svg><span>Descubrir</span></div>
+        <div class="nav-item" onclick="goTo('communities')"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 012-2h14M4 19a2 2 0 002 2h14M4 19h14a2 2 0 002-2V9M18 3v6"/></svg><span>Comunidades</span></div>
+        <div class="nav-item" onclick="goTo('chats')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Chat</span></div>
+        <div class="nav-item" onclick="goTo('profile')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Perfil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: COMMUNITIES ═══════════════════════ -->
+  <div class="screen" id="screen-communities">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="communities-header">
+        <h1>Comunidades</h1>
+        <p>Aprende con tu grupo</p>
+      </div>
+      <div class="communities-search">
+        <input class="search-field" type="text" placeholder="Materia o palabra clave" oninput="filterCommunities(this.value)">
+      </div>
+      <div style="padding:10px 20px;display:flex;gap:8px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+        <div class="chip" onclick="switchCommTab(this,'mine')">Mis grupos</div>
+        <div class="chip" onclick="switchCommTab(this,'uni')">UNI</div>
+        <div class="chip active" onclick="switchCommTab(this,'all')">Todas</div>
+      </div>
+      <div class="screen-body" style="padding:16px 20px;">
+        <div id="comm-mine-section">
+          <div class="comm-group-title">Tus comunidades</div>
+          <div class="comm-card" data-scope="mine uni" onclick="openCommunity('calc1')">
+            <div class="comm-name">Cálculo I <span class="arrow">→</span></div>
+            <div class="comm-desc">Derivadas, límites e integrales</div>
+            <div class="comm-meta"><span class="online-dot"></span>128 miembros · 8 en línea</div>
+          </div>
+          <div class="comm-card" data-scope="mine uni" onclick="openCommunity('algebra')">
+            <div class="comm-name">Álgebra lineal <span class="arrow">→</span></div>
+            <div class="comm-desc">Matrices y espacios vectoriales</div>
+            <div class="comm-meta"><span class="online-dot"></span>86 miembros · 3 en línea</div>
+          </div>
+        </div>
+        <div id="comm-explore-section">
+          <div class="comm-group-title">Explora más</div>
+          <div class="comm-card" data-scope="uni" onclick="joinCommunity(this,'Programación I')">
+            <div class="comm-name">Programación I <span class="arrow">→</span></div>
+            <div class="comm-desc">Lógica, algoritmos y proyectos</div>
+            <div class="comm-meta"><span class="online-dot"></span>204 miembros · 12 en línea</div>
+          </div>
+          <div class="comm-card" data-scope="uni" onclick="joinCommunity(this,'Física I')">
+            <div class="comm-name">Física I <span class="arrow">→</span></div>
+            <div class="comm-desc">Mecánica, termodinámica y ondas</div>
+            <div class="comm-meta"><span class="online-dot"></span>156 miembros · 5 en línea</div>
+          </div>
+          <div class="comm-card" onclick="joinCommunity(this,'Estadística')">
+            <div class="comm-name">Estadística <span class="arrow">→</span></div>
+            <div class="comm-desc">Probabilidad y análisis de datos</div>
+            <div class="comm-meta"><span class="online-dot"></span>93 miembros · 2 en línea</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <button class="btn-primary" onclick="showToast('Función disponible próximamente')">+ Crear comunidad</button>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="goTo('home')"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg><span>Inicio</span></div>
+        <div class="nav-item" onclick="goTo('discover')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7"/><path d="M15 17l2 2 4-4"/></svg><span>Descubrir</span></div>
+        <div class="nav-item active" onclick="goTo('communities')"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 012-2h14M4 19a2 2 0 002 2h14M4 19h14a2 2 0 002-2V9M18 3v6"/></svg><span>Comunidades</span></div>
+        <div class="nav-item" onclick="goTo('chats')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Chat</span></div>
+        <div class="nav-item" onclick="goTo('profile')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Perfil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: COMMUNITY DETAIL ═══════════════════════ -->
+  <div class="screen" id="screen-community-detail">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="comm-detail-header">
+        <div class="comm-detail-top">
+          <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-1)" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <h1 id="comm-detail-name">Cálculo I</h1>
+        </div>
+        <div class="comm-detail-meta"><span class="online-dot"></span><span id="comm-detail-meta">128 miembros · 8 en línea · Ver miembros →</span></div>
+        <div class="comm-detail-desc" id="comm-detail-desc">Un espacio para resolver dudas y avanzar juntos.</div>
+        <div class="comm-tabs">
+          <div class="comm-tab active" onclick="switchCommDetailTab(this,'temas')">Temas</div>
+          <div class="comm-tab" onclick="switchCommDetailTab(this,'miembros')">Miembros</div>
+          <div class="comm-tab" onclick="switchCommDetailTab(this,'info')">Información</div>
+        </div>
+      </div>
+      <div class="screen-body" style="padding:12px 20px;padding-bottom:80px;">
+        <div id="comm-tab-temas">
+          <div style="margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:8px;">Filtrar temas por nivel Bloom</div>
+            <div class="bloom-filter-row" id="bloom-filters">
+              <button class="bloom-filter-btn bf-active" style="background:var(--b1)" onclick="toggleBloomFilter(this,1)">1 Recordar</button>
+              <button class="bloom-filter-btn bf-active" style="background:var(--b2)" onclick="toggleBloomFilter(this,2)">2 Comprender</button>
+              <button class="bloom-filter-btn bf-active" style="background:var(--b3)" onclick="toggleBloomFilter(this,3)">3 Aplicar</button>
+              <button class="bloom-filter-btn bf-active" style="background:var(--b4)" onclick="toggleBloomFilter(this,4)">4 Analizar</button>
+              <button class="bloom-filter-btn bf-active" style="background:var(--b5)" onclick="toggleBloomFilter(this,5)">5 Evaluar</button>
+              <button class="bloom-filter-btn bf-active" style="background:var(--b6)" onclick="toggleBloomFilter(this,6)">6 Crear</button>
+            </div>
+          </div>
+          <div id="comm-topics-list"></div>
+        </div>
+        <div id="comm-tab-miembros" style="display:none;"></div>
+        <div id="comm-tab-info" style="display:none;"></div>
+      </div>
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 20px 24px;background:linear-gradient(to top,var(--bg) 80%,transparent);">
+        <button class="btn-primary" onclick="showPublishTopicModal()">+ Publicar tema</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: LEARNING PATH ═══════════════════════ -->
+  <div class="screen" id="screen-learning-path">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="lp-header">
+        <div class="lp-header-top">
+          <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-1)" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <h1>Derivadas</h1>
+        </div>
+        <p>Cálculo I · Tu ruta de aprendizaje</p>
+        <div class="lp-header-progress">2 completados · Nivel actual: 3 Aplicar</div>
+      </div>
+      <div class="lp-body" id="lp-body"></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 20px 28px;background:linear-gradient(to top,var(--bg) 80%,transparent);">
+        <button class="btn-primary" onclick="goTo('session')">Iniciar sesión de estudio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: CHATS ═══════════════════════ -->
+  <div class="screen" id="screen-chats">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="chats-header">
+        <h1>Conversaciones</h1>
+        <p>Estudia también conversando</p>
+      </div>
+      <div class="chats-search-wrap">
+        <input class="search-field" type="text" placeholder="Persona o grupo" oninput="filterChats(this.value)">
+      </div>
+      <div style="padding:10px 20px;display:flex;gap:8px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+        <div class="chip active" onclick="switchChatFilter(this,'all')">Todas</div>
+        <div class="chip" onclick="switchChatFilter(this,'1:1')">1:1</div>
+        <div class="chip" onclick="switchChatFilter(this,'group')">Grupos</div>
+      </div>
+      <div class="screen-body" id="chat-list-body"></div>
+      <div style="padding:12px 20px 8px;">
+        <button class="btn-secondary" onclick="showToast('Selecciona un contacto para iniciar')">+ Nueva conversación</button>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="goTo('home')"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg><span>Inicio</span></div>
+        <div class="nav-item" onclick="goTo('discover')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7"/><path d="M15 17l2 2 4-4"/></svg><span>Descubrir</span></div>
+        <div class="nav-item" onclick="goTo('communities')"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 012-2h14M4 19a2 2 0 002 2h14M4 19h14a2 2 0 002-2V9M18 3v6"/></svg><span>Comunidades</span></div>
+        <div class="nav-item active" onclick="goTo('chats')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Chat</span></div>
+        <div class="nav-item" onclick="goTo('profile')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Perfil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: CHAT DETAIL ═══════════════════════ -->
+  <div class="screen" id="screen-chat-detail">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="chat-detail-header">
+        <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-1)" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="chat-detail-avatar" id="chat-detail-avatar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <div class="chat-detail-name" id="chat-detail-name">Lucía Torres</div>
+          <div class="chat-detail-status" id="chat-detail-status">En línea · Cálculo I</div>
+        </div>
+        <div class="chat-detail-actions">
+          <button class="chat-detail-action" onclick="goTo('session')" title="Ver sesión">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="messages-area" id="messages-area"></div>
+      <div class="chat-input-bar">
+        <textarea class="chat-input" id="chat-input" rows="1" placeholder="Escribe un mensaje..." onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: STUDY SESSION ═══════════════════════ -->
+  <div class="screen" id="screen-session">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="session-header">
+        <div class="session-header-top">
+          <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-1)" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <h1>Sesión de estudio</h1>
+        </div>
+        <p>Derivadas · Ori y Lucía · En línea</p>
+      </div>
+      <div class="session-body" id="session-body">
+        <div class="timer-card">
+          <div class="timer-bloom-badge">
+            <span class="bloom-badge" style="background:var(--b3-bg);color:var(--b3);padding:5px 14px;font-size:13px;">3 Aplicar · En curso</span>
+          </div>
+          <div class="timer-display" id="timer-display">00:00</div>
+          <div class="timer-meta">Tiempo transcurrido · Objetivo: 45 min</div>
+          <div class="timer-controls">
+            <button class="btn-timer-pause" id="timer-toggle-btn" onclick="toggleTimer()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" id="timer-icon">
+                <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+              </svg>
+              <span id="timer-btn-text">Pausar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-title">Checklist · Resolver ejercicios</div>
+          <div id="checklist-items"></div>
+        </div>
+
+        <div class="notes-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div class="notes-title">Notas compartidas</div>
+            <span class="notes-edit-btn" onclick="editNotes()">Editar notas</span>
+          </div>
+          <div class="notes-content" id="notes-content">Regla de la cadena: (f ∘ g)' = f'(g(x)) · g'(x)</div>
+          <div class="notes-typing" id="notes-typing"></div>
+        </div>
+
+        <div class="session-actions">
+          <button class="btn-open-chat" onclick="openChat('lucia')">Abrir chat</button>
+          <button class="btn-end-session" onclick="showSessionEndModal()">Finalizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: PROGRESS ═══════════════════════ -->
+  <div class="screen" id="screen-progress">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="page-header">
+        <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-1)" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div>
+          <h1>Mi progreso</h1>
+          <div style="font-size:13px;color:var(--text-2);margin-top:2px;">Cada sesión cuenta</div>
+        </div>
+      </div>
+      <div class="screen-body">
+        <div class="progress-body" id="progress-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: PROFILE ═══════════════════════ -->
+  <div class="screen" id="screen-profile">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="profile-header">
+        <h1>Mi perfil</h1>
+        <p>Tu espacio en StudyMatch</p>
+      </div>
+      <div class="screen-body">
+        <div class="profile-body" id="profile-body"></div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="goTo('home')"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg><span>Inicio</span></div>
+        <div class="nav-item" onclick="goTo('discover')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7"/><path d="M15 17l2 2 4-4"/></svg><span>Descubrir</span></div>
+        <div class="nav-item" onclick="goTo('communities')"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 012-2h14M4 19a2 2 0 002 2h14M4 19h14a2 2 0 002-2V9M18 3v6"/></svg><span>Comunidades</span></div>
+        <div class="nav-item" onclick="goTo('chats')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Chat</span></div>
+        <div class="nav-item active" onclick="goTo('profile')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Perfil</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCREEN: SETTINGS ═══════════════════════ -->
+  <div class="screen" id="screen-settings">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="page-header">
+        <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-1)" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div>
+          <h1>Ajustes</h1>
+          <div style="font-size:13px;color:var(--text-2);margin-top:2px;">Cuenta y preferencias</div>
+        </div>
+      </div>
+      <div class="screen-body">
+        <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;">
+          <div class="profile-card">
+            <div style="font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">Cuenta</div>
+            <div class="settings-list">
+              <button onclick="showToast('Actualiza tu correo o contraseña')">
+                <div><div class="settings-item-label">Correo y contraseña</div><div style="font-size:12px;color:var(--text-3);margin-top:2px;" id="settings-email-display">ori.silva@uni.co</div></div>
+                <div class="settings-item-val">→</div>
+              </button>
+            </div>
+          </div>
+          <div class="profile-card">
+            <div style="font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">Notificaciones</div>
+            <div class="settings-list">
+              <div class="modal-option" style="padding:12px 0;">
+                <span class="settings-item-label">Recordatorios de sesión</span>
+                <div class="toggle on" id="toggle-reminders" onclick="toggleSetting(this)"></div>
+              </div>
+              <div class="modal-option" style="padding:12px 0;">
+                <span class="settings-item-label">Nuevos mensajes</span>
+                <div class="toggle on" id="toggle-messages" onclick="toggleSetting(this)"></div>
+              </div>
+              <div class="modal-option" style="padding:12px 0;border:none;">
+                <span class="settings-item-label">Matches sugeridos</span>
+                <div class="toggle" id="toggle-matches" onclick="toggleSetting(this)"></div>
+              </div>
+            </div>
+          </div>
+          <div class="profile-card">
+            <div style="font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">Preferencias y ayuda</div>
+            <div class="settings-list">
+              <button onclick="showToast('Ajusta quién puede ver tu perfil')"><span class="settings-item-label">Privacidad y visibilidad</span><div class="settings-item-val">→</div></button>
+              <button onclick="showToast('Idioma: Español')"><span class="settings-item-label">Idioma · Español</span><div class="settings-item-val">→</div></button>
+              <button onclick="showToast('Centro de ayuda disponible próximamente')"><span class="settings-item-label">Ayuda y seguridad</span><div class="settings-item-val">→</div></button>
+              <button onclick="showToast('Consulta nuestros términos de uso')"><span class="settings-item-label">Términos y privacidad</span><div class="settings-item-val">→</div></button>
+            </div>
+          </div>
+          <button class="btn-secondary" style="color:var(--danger);border-color:var(--danger);" onclick="doLogout()">Cerrar sesión</button>
+          <div style="text-align:center;font-size:12px;color:var(--text-3);padding:8px 0;">StudyMatch · Versión 1.0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ MODALS ═══════════════════════ -->
+
+  <!-- Add tag modal -->
+  <div class="modal-overlay" id="modal-add-tag" onclick="closeModal('modal-add-tag')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="modal-add-tag-title">Añadir fortaleza</div>
+      <div id="modal-add-tag-options"></div>
+      <div style="margin-top:12px;">
+        <div style="display:flex;gap:8px;">
+          <input class="input-field" id="custom-tag-input" placeholder="Escribe un tema..." style="flex:1;">
+          <button class="btn-primary" style="width:auto;padding:14px 20px;" onclick="addCustomTag()">Añadir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Publish topic modal -->
+  <div class="modal-overlay" id="modal-publish-topic" onclick="closeModal('modal-publish-topic')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Publicar tema</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="input-group">
+          <label class="input-label">Título del tema</label>
+          <input class="input-field" id="new-topic-title" placeholder="ej. Derivadas: regla del producto">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Nivel Bloom</label>
+          <select class="select-field" id="new-topic-bloom">
+            <option value="1">1 Recordar</option>
+            <option value="2">2 Comprender</option>
+            <option value="3" selected>3 Aplicar</option>
+            <option value="4">4 Analizar</option>
+            <option value="5">5 Evaluar</option>
+            <option value="6">6 Crear</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Descripción</label>
+          <textarea class="input-field" id="new-topic-desc" rows="3" placeholder="¿Qué quieres resolver o compartir?" style="resize:none;"></textarea>
+        </div>
+        <button class="btn-primary" onclick="publishTopic()">Publicar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session end modal -->
+  <div class="modal-overlay" id="modal-session-end" onclick="dismissSessionEnd()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="session-end-modal">
+        <div style="font-size:32px;text-align:center;margin-bottom:8px;color:var(--primary);">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <div class="session-end-title">¡Sesión completada!</div>
+        <div class="session-end-sub">Excelente trabajo. Cada sesión cuenta.</div>
+        <div class="session-end-stats">
+          <div class="session-end-stat">
+            <div class="session-end-stat-val" id="end-time">24:18</div>
+            <div class="session-end-stat-label">Tiempo</div>
+          </div>
+          <div class="session-end-stat">
+            <div class="session-end-stat-val" id="end-tasks">2/4</div>
+            <div class="session-end-stat-label">Tareas</div>
+          </div>
+          <div class="session-end-stat">
+            <div class="session-end-stat-val">+1</div>
+            <div class="session-end-stat-label">Nivel</div>
+          </div>
+        </div>
+        <div class="rating-section">
+          <div class="rating-title">¿Cómo estuvo la sesión con Lucía?</div>
+          <div class="stars" id="rating-stars">
+            <span class="star active" onclick="setRating(1)">★</span>
+            <span class="star active" onclick="setRating(2)">★</span>
+            <span class="star active" onclick="setRating(3)">★</span>
+            <span class="star active" onclick="setRating(4)">★</span>
+            <span class="star" onclick="setRating(5)">★</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-secondary" style="flex:1;" onclick="dismissSessionEnd()">Seguir en sesión</button>
+          <button class="btn-primary" style="flex:1;" onclick="finishSession()">Guardar y salir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+const SVGS = {
+  user: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  tutor: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`,
+  group: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-3-3.87"/><path d="M7 23v-2a4 4 0 0 1 3-3.87"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  badgeHand: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 0 1 2 2v4a6 6 0 0 1-6 6h-2a6 6 0 0 1-6-6v-1a2 2 0 0 1 2-2h2"/></svg>`,
+  badgeCheck: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+  badgeBook: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`
+};
+
+const STATE = {
+  user: null,
+  currentScreen: 'splash',
+  screenHistory: [],
+  currentCommunity: null,
+  currentChatId: null,
+  timer: { running: false, userPaused: false, seconds: 0, interval: null },
+  checklist: [
+    { id: 1, text: 'Identificar la función compuesta', done: true },
+    { id: 2, text: 'Resolver un ejemplo juntas', done: true },
+    { id: 3, text: 'Resolver 5 ejercicios', done: false },
+    { id: 4, text: 'Revisar respuestas y registrar dudas', done: false }
+  ],
+  discoverIndex: 0,
+  bloomFilters: new Set([1,2,3,4,5,6]),
+  communityData: {
+    calc1: {
+      name: 'Cálculo I', desc: 'Un espacio para resolver dudas y avanzar juntos.',
+      members: 128, online: 8,
+      topics: [
+        { id:1, bloom:3, title:'Derivadas: regla de la cadena', author:'Lucía', time:'Hace 15 min', desc:'¿Resolvemos estos ejercicios juntos?', replies:6, participants:4 },
+        { id:2, bloom:3, title:'Derivadas: práctica guiada', author:'Diego', time:'Hace 1 h', desc:'8 ejercicios · Sesión hoy a las 16:00', replies:2, participants:3 },
+        { id:3, bloom:2, title:'Límites: regla de L\'Hôpital', author:'Ana', time:'Hace 3 h', desc:'Explicación paso a paso con ejemplos', replies:11, participants:6 },
+        { id:4, bloom:1, title:'Flashcards de derivadas', author:'Carlos', time:'Ayer', desc:'Mazo de 40 tarjetas para repasar fórmulas', replies:3, participants:8 },
+        { id:5, bloom:4, title:'Comparando métodos de integración', author:'Lucía', time:'Ayer', desc:'¿Cuándo usar sustitución vs por partes?', replies:9, participants:5 },
+        { id:6, bloom:6, title:'Proyecto: visualizador de derivadas', author:'Diego', time:'Hace 2 días', desc:'Herramienta en Python para graficar', replies:4, participants:2 }
+      ]
+    },
+    algebra: {
+      name: 'Álgebra lineal', desc: 'Matrices, vectores y transformaciones lineales.',
+      members: 86, online: 3,
+      topics: [
+        { id:7, bloom:1, title:'Definiciones: matrices y determinantes', author:'Maria', time:'Hace 2 h', desc:'Repaso de conceptos básicos', replies:5, participants:7 },
+        { id:8, bloom:3, title:'Operaciones con matrices 3×3', author:'Pedro', time:'Hace 4 h', desc:'Práctica de multiplicación y transposición', replies:8, participants:4 },
+        { id:9, bloom:4, title:'Espacios vectoriales: análisis', author:'Sofia', time:'Ayer', desc:'¿Cuándo es un conjunto base?', replies:3, participants:3 }
+      ]
+    }
+  },
+  matches: [
+    { id:1, name:'Lucía Torres', icon:SVGS.user, uni:'UNI', career:'Ingeniería', semester:'4.º semestre', subject:'Cálculo I', compat:92, teaches:['derivadas','límites'], learns:['álgebra lineal'], avail:'Mar. y jue. · 16:00–18:00', type:'peer', connected:false },
+    { id:2, name:'Diego Ruiz', icon:SVGS.user, uni:'UNAM', career:'Ciencias', semester:'5.º semestre', subject:'Cálculo I', compat:86, teaches:['integrales','series'], learns:['programación'], avail:'Lun. y mié. · 10:00–12:00', type:'peer', connected:false },
+    { id:3, name:'Ana Gómez', icon:SVGS.tutor, uni:'UNI', career:'Matemáticas', semester:'6.º semestre', subject:'Álgebra lineal', compat:79, teaches:['matrices','espacios vectoriales'], learns:['estadística'], avail:'Vie. · 14:00–17:00', type:'tutor', connected:false },
+    { id:4, name:'Carlos Medina', icon:SVGS.user, uni:'Agustiniana', career:'Ingeniería', semester:'5.º semestre', subject:'Programación I', compat:74, teaches:['Python','algoritmos'], learns:['cálculo'], avail:'Sáb. · 10:00–13:00', type:'peer', connected:false },
+    { id:5, name:'Sofia Herrera', icon:SVGS.tutor, uni:'UNI', career:'Matemáticas', semester:'8.º semestre', subject:'Cálculo I', compat:88, teaches:['series','límites'], learns:['inglés'], avail:'Mar. y jue. · 18:00–20:00', type:'tutor', connected:false }
+  ],
+  chats: [
+    { id:'lucia', name:'Lucía Torres', icon:SVGS.user, type:'1:1', subject:'Cálculo I', online:true, time:'15:42', unread:2,
+      messages:[
+        { from:'them', text:'Hola, Ori. Vi que quieres practicar derivadas.', time:'15:38' },
+        { from:'me', text:'Sí, me cuesta la regla de la cadena. ¿Estudiamos juntas?', time:'15:40', read:true },
+        { from:'them', text:'Claro, ¿empezamos con la regla de la cadena?', time:'15:42' }
+      ],
+      sessionCard: true
+    },
+    { id:'calc1-group', name:'Cálculo I · Grupo', icon:SVGS.group, type:'group', subject:'Cálculo I', online:false, time:'14:10', unread:5,
+      messages:[
+        { from:'them', text:'Diego: compartí los ejercicios de hoy en el grupo', time:'14:10' },
+        { from:'me', text:'Gracias Diego, los reviso ahora', time:'14:15' }
+      ]
+    },
+    { id:'diego', name:'Diego Ruiz', icon:SVGS.user, type:'1:1', subject:'Cálculo I', online:false, time:'Ayer', unread:0,
+      messages:[
+        { from:'them', text:'¿Cómo te fue en el parcial?', time:'Ayer' },
+        { from:'me', text:'Bien gracias, la sección de integrales me costó', time:'Ayer' },
+        { from:'them', text:'Gracias por la explicación.', time:'Ayer' }
+      ]
+    },
+    { id:'algebra-group', name:'Álgebra lineal · Grupo', icon:SVGS.group, type:'group', subject:'Álgebra lineal', online:false, time:'Ayer', unread:0,
+      messages:[
+        { from:'them', text:'Ana: ¿repasamos matrices mañana?', time:'Ayer' }
+      ]
+    }
+  ],
+  bloomLevels: [
+    { num:1, name:'Recordar', sub:'Repasar con flashcards', color:'var(--b1)', status:'completed' },
+    { num:2, name:'Comprender', sub:'Explicar con tus propias palabras', color:'var(--b2)', status:'completed' },
+    { num:3, name:'Aplicar', sub:'Resolver ejercicios', color:'var(--b3)', status:'current' },
+    { num:4, name:'Analizar', sub:'Comparar enfoques', color:'var(--b4)', status:'locked' },
+    { num:5, name:'Evaluar', sub:'Criticar soluciones', color:'var(--b5)', status:'locked' },
+    { num:6, name:'Crear', sub:'Crear un proyecto', color:'var(--b6)', status:'locked' }
+  ]
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+const esc = v => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function loadUser() { try { return JSON.parse(localStorage.getItem('sm_user')); } catch (e) { return null; } }
+function saveUser() { try { localStorage.setItem('sm_user', JSON.stringify(STATE.user)); } catch (e) {} }
+function clearUser() { try { localStorage.removeItem('sm_user'); } catch (e) {} }
+
+window.addEventListener('DOMContentLoaded', () => {
+  STATE.user = loadUser();
+  if (STATE.user) updateHomeUI();
+  // Splash → onboarding after 2.2s
+  setTimeout(() => {
+    if (STATE.user) {
+      transitionTo('home');
+    } else {
+      transitionTo('onboarding');
+    }
+  }, 2200);
+
+  // Init timer display
+  updateTimerDisplay();
+  // Start typing simulation in chat
+  startLuciaTyping();
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+let obSlide = 0;
+const screenMap = {
+  'home':'screen-home', 'discover':'screen-discover', 'communities':'screen-communities',
+  'community-detail':'screen-community-detail', 'learning-path':'screen-learning-path',
+  'chats':'screen-chats', 'chat-detail':'screen-chat-detail', 'session':'screen-session',
+  'progress':'screen-progress', 'profile':'screen-profile', 'settings':'screen-settings',
+  'auth':'screen-auth', 'setup':'screen-setup', 'onboarding':'screen-onboarding', 'splash':'screen-splash'
+};
+
+function transitionTo(name) {
+  const overlay = document.getElementById('transition-overlay');
+  overlay.classList.add('show');
+  STATE.currentScreen = name;
+  setTimeout(() => {
+    showScreen(name);
+    overlay.classList.remove('show');
+  }, 180);
+}
+
+function onEnter(name) {
+  if (name === 'home') updateHomeUI();
+  if (name === 'discover') renderDiscoverCard();
+  if (name === 'chats') renderChatList();
+  if (name === 'chat-detail') renderChatDetail();
+  if (name === 'progress') renderProgress();
+  if (name === 'profile') renderProfile();
+  if (name === 'learning-path') renderLearningPath();
+  if (name === 'settings') updateSettingsEmail();
+  if (name === 'session') enterSession(); else if (STATE.timer.running) stopTimer();
+}
+
+function goTo(name) {
+  const from = STATE.currentScreen;
+  if (name === from) return;
+  STATE.screenHistory.push(from);
+  if (STATE.screenHistory.length > 20) STATE.screenHistory.shift();
+  transitionTo(name);
+  onEnter(name);
+}
+
+function goBack() {
+  const prev = STATE.screenHistory.pop() || 'home';
+  transitionTo(prev);
+  onEnter(prev);
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(screenMap[name] || 'screen-home');
+  if (el) el.classList.add('active');
+  STATE.currentScreen = name;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ONBOARDING
+// ═══════════════════════════════════════════════════════════════
+function nextSlide() {
+  const slides = document.querySelectorAll('.onboarding-slide');
+  const dots = document.querySelectorAll('.ob-dot');
+
+  if (obSlide >= slides.length - 1) return;
+  const prev = slides[obSlide];
+  prev.classList.add('exit');
+  setTimeout(() => prev.classList.remove('active','exit'), 350);
+
+  obSlide++;
+
+  if (obSlide >= slides.length - 1) {
+    document.getElementById('ob-actions-next').style.display = 'none';
+    document.getElementById('ob-actions-final').style.display = 'flex';
+  }
+
+  setTimeout(() => {
+    slides[obSlide].classList.add('active');
+    dots.forEach((d,i) => d.classList.toggle('active', i === obSlide));
+  }, 50);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════════════
+function switchAuthTab(tab) {
+  document.getElementById('panel-register').classList.toggle('active', tab==='register');
+  document.getElementById('panel-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  const title = document.getElementById('auth-title');
+  const sub = document.getElementById('auth-sub');
+  if (tab === 'login') {
+    title.textContent = 'Iniciar sesión';
+    sub.textContent = 'StudyMatch · Inicia tu comunidad';
+  } else {
+    title.textContent = 'Crea tu cuenta';
+    sub.textContent = 'StudyMatch · Empieza tu comunidad';
+  }
+}
+
+function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const uni = document.getElementById('reg-uni').value;
+  const pass = document.getElementById('reg-pass').value;
+  const terms = document.getElementById('reg-terms').checked;
+
+  if (!name) return showToast('Ingresa tu nombre completo');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Ingresa un correo válido');
+  if (!uni) return showToast('Selecciona tu universidad');
+  if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(pass)) return showToast('Mínimo 8 caracteres, con una letra y un número');
+  if (!terms) return showToast('Acepta los términos de uso');
+
+  STATE.user = { name, email, uni, firstName: name.split(' ')[0] };
+  saveUser();
+  showToast('¡Cuenta creada! Configura tu perfil');
+  setTimeout(() => goTo('setup'), 800);
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const uni = document.getElementById('login-uni').value;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Ingresa un correo válido');
+  if (!pass) return showToast('Ingresa tu contraseña');
+
+  const saved = loadUser();
+  if (saved && saved.email && saved.email.toLowerCase() === email.toLowerCase()) {
+    STATE.user = saved;
+  } else {
+    const n = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    STATE.user = { name: n, email, uni, firstName: n.split(' ')[0] };
+    saveUser();
+  }
+  showToast(`Bienvenido de nuevo, ${STATE.user.firstName}`);
+  setTimeout(() => { updateHomeUI(); goTo('home'); }, 600);
+}
+
+function doLogout() {
+  if (confirm('¿Cerrar sesión?')) {
+    STATE.user = null;
+    clearUser(); ['login-pass','reg-pass'].forEach(i => { document.getElementById(i).value = ''; });
+    goTo('auth');
+    switchAuthTab('login');
+  }
+}
+
+function togglePw(fieldId, btn) {
+  const field = document.getElementById(fieldId);
+  field.type = field.type === 'password' ? 'text' : 'password';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PROFILE SETUP
+// ═══════════════════════════════════════════════════════════════
+function addSubjectTag() {
+  const sel = document.getElementById('setup-subject-select');
+  const val = sel.value;
+  if (!val) return;
+  const list = document.getElementById('subjects-tag-list');
+  const existing = Array.from(list.querySelectorAll('[data-val]')).map(t => t.dataset.val);
+  if (existing.includes(val)) { showToast('Ya tienes esta materia'); sel.value = ''; return; }
+  const tag = createTag(val, 'subjects-tag-list', val);
+  list.insertBefore(tag, list.querySelector('.tag-add-btn'));
+  sel.value = '';
+}
+
+function createTag(text, listId, val) {
+  const span = document.createElement('span');
+  span.className = 'tag removable';
+  span.dataset.val = val;
+  span.appendChild(document.createTextNode(text + ' '));
+  const x = document.createElement('span');
+  x.className = 'tag-remove';
+  x.textContent = '×';
+  x.onclick = () => span.remove();
+  span.appendChild(x);
+  return span;
+}
+
+function removeTag(btn, listId, val) {
+  btn.parentElement.remove();
+}
+
+let currentTagListId = '';
+let currentTagType = '';
+function openAddTag(listId, type) {
+  currentTagListId = listId;
+  currentTagType = type;
+  document.getElementById('modal-add-tag-title').textContent = `Añadir ${type}`;
+  document.getElementById('custom-tag-input').value = '';
+  const options = ['Álgebra', 'Cálculo diferencial', 'Trigonometría', 'Estadística', 'Física', 'Química', 'Programación', 'Python', 'JavaScript', 'Bases de datos'];
+  const container = document.getElementById('modal-add-tag-options');
+  container.innerHTML = options.map(o => `<div class="modal-option" onclick="addPresetTag('${o}')"><span class="modal-option-label">${o}</span></div>`).join('');
+  openModal('modal-add-tag');
+}
+
+function addPresetTag(val) {
+  addTagToList(currentTagListId, val);
+  closeModal('modal-add-tag');
+}
+
+function addCustomTag() {
+  const val = document.getElementById('custom-tag-input').value.trim();
+  if (!val) return;
+  addTagToList(currentTagListId, val);
+  closeModal('modal-add-tag');
+}
+
+function addTagToList(listId, val) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  const existing = Array.from(list.querySelectorAll('[data-val]')).map(t => t.dataset.val);
+  if (existing.includes(val)) return showToast('Ya tienes este elemento');
+  const addBtn = list.querySelector('.tag-add-btn');
+  const tag = createTag(val, listId, val);
+  list.insertBefore(tag, addBtn);
+}
+
+function doSetupProfile() {
+  const career = document.getElementById('setup-career').value;
+  const semester = document.getElementById('setup-semester').value;
+  const avail = document.getElementById('setup-avail').value;
+  if (STATE.user) {
+    STATE.user.career = career;
+    STATE.user.semester = semester;
+    STATE.user.avail = avail;
+    const vals = id => Array.from(document.querySelectorAll('#' + id + ' [data-val]')).map(t => t.dataset.val);
+    STATE.user.subjects = vals('subjects-tag-list');
+    STATE.user.teach = vals('strengths-tag-list');
+    STATE.user.learn = vals('needs-tag-list');
+    saveUser();
+  }
+  showToast('Perfil guardado exitosamente');
+  setTimeout(() => { updateHomeUI(); goTo('home'); }, 800);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  HOME
+// ═══════════════════════════════════════════════════════════════
+function updateHomeUI() {
+  if (!STATE.user) return;
+  const first = STATE.user.firstName || STATE.user.name?.split(' ')[0] || 'Ori';
+  const greet = document.getElementById('home-greeting');
+  const dateEl = document.getElementById('home-date');
+  if (greet) greet.textContent = `Hola, ${first}`;
+  const now = new Date();
+  const days = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  if (dateEl) dateEl.textContent = `${days[now.getDay()]} ${now.getDate()} de ${months[now.getMonth()]} · ${STATE.user.uni || 'UNI'}`;
+}
+
+function updateSettingsEmail() {
+  const el = document.getElementById('settings-email-display');
+  if (el && STATE.user) el.textContent = STATE.user.email || 'ori.silva@uni.co';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DISCOVER
+// ═══════════════════════════════════════════════════════════════
+let discoverFilter = 'all';
+let discoverMatches = [];
+
+function filterDiscover(btn, type) {
+  document.querySelectorAll('#screen-discover .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  discoverFilter = type;
+  STATE.discoverIndex = 0;
+  buildDiscoverQueue();
+  renderDiscoverCard();
+}
+
+function filterDiscoverMatches() { buildDiscoverQueue(); renderDiscoverCard(); }
+
+function buildDiscoverQueue() {
+  const subject = document.getElementById('discover-subject')?.value || 'Cálculo I';
+  discoverMatches = STATE.matches.filter(m => {
+    const matchesFilter = discoverFilter === 'all' || m.type === (discoverFilter === 'peer' ? 'peer' : 'tutor');
+    const matchesSubject = subject === 'Todas' || m.subject === subject;
+    return matchesFilter && matchesSubject;
+  });
+  STATE.discoverIndex = 0;
+}
+
+function renderDiscoverCard() {
+  if (!discoverMatches.length) buildDiscoverQueue();
+  const container = document.getElementById('discover-main-card');
+  const alsoContainer = document.getElementById('discover-also-matches');
+  const emptyEl = document.getElementById('discover-empty');
+  if (!container) return;
+
+  if (STATE.discoverIndex >= discoverMatches.length) {
+    container.innerHTML = '';
+    alsoContainer.innerHTML = '';
+    emptyEl.style.display = 'block';
+    emptyEl.children[1].textContent = discoverMatches.length ? '¡Exploraste todos los matches!' : 'Aún no hay matches para esta materia';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  const m = discoverMatches[STATE.discoverIndex];
+  const connected = m.connected;
+  container.innerHTML = `
+    <div class="match-swipe-card animate-in">
+      <div class="match-swipe-header">
+        <div class="match-swipe-avatar">${m.icon}</div>
+        <div>
+          <div class="match-swipe-name">${m.name}</div>
+          <div class="match-swipe-sub">${m.career} · ${m.uni} · ${m.semester}</div>
+        </div>
+      </div>
+      <div class="match-swipe-tags">
+        <span class="chip" style="font-size:12px;padding:3px 10px;">${m.subject}</span>
+        <span class="compat-badge">${m.compat}% compatible</span>
+        ${m.type === 'tutor' ? '<span class="bloom-badge" style="background:var(--surface-hover);color:var(--primary);font-size:11px;">Tutor verificado</span>' : ''}
+      </div>
+      <div class="match-swipe-desc">
+        Puede apoyar: ${m.teaches.join(' y ')}. Busca aprender: ${m.learns.join(', ')}.
+      </div>
+      <div class="match-swipe-avail">Disponible ${m.avail}</div>
+      <div class="match-swipe-actions">
+        <button class="btn-skip" onclick="skipMatch()">Omitir</button>
+        <button class="btn-connect" onclick="connectMatch(${m.id})">${connected ? 'Conectado ✓' : 'Conectar'}</button>
+      </div>
+    </div>`;
+
+  // Also matches
+  const others = discoverMatches.filter((_,i) => i > STATE.discoverIndex && i < STATE.discoverIndex + 3);
+  if (others.length) {
+    alsoContainer.innerHTML = `
+      <div class="also-matches">
+        <div class="also-matches-title">También coincide contigo</div>
+        ${others.map(o => `
+          <div class="also-match-item" onclick="jumpToMatch(${o.id})">
+            <div style="font-size:24px;color:var(--primary);">${o.icon}</div>
+            <div>
+              <div class="also-match-name">${o.name} · ${o.compat}% compatible</div>
+              <div class="also-match-sub">${o.subject} · Puede enseñar ${o.teaches[0]}</div>
+            </div>
+          </div>`).join('')}
+        <div style="font-size:12px;color:var(--text-3);margin-top:10px;">Las conexiones se confirman cuando ambos aceptan.</div>
+      </div>`;
+  } else {
+    alsoContainer.innerHTML = '';
+  }
+}
+
+function skipMatch() {
+  STATE.discoverIndex++;
+  renderDiscoverCard();
+}
+
+function connectMatch(id) {
+  const m = STATE.matches.find(x => x.id === id);
+  if (m && !m.connected) {
+    m.connected = true;
+    showToast(`Solicitud enviada a ${m.name}`);
+    setTimeout(() => {
+      STATE.discoverIndex++;
+      renderDiscoverCard();
+    }, 800);
+  }
+}
+
+function jumpToMatch(id) {
+  const idx = discoverMatches.findIndex(m => m.id === id);
+  if (idx !== -1) { STATE.discoverIndex = idx; renderDiscoverCard(); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  COMMUNITIES
+// ═══════════════════════════════════════════════════════════════
+let commTab = 'all', commQuery = '';
+function switchCommTab(btn, tab) {
+  document.querySelectorAll('#screen-communities .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  commTab = tab;
+  applyCommunityFilters();
+}
+
+function filterCommunities(query) {
+  commQuery = query.toLowerCase();
+  applyCommunityFilters();
+}
+
+function applyCommunityFilters() {
+  document.querySelectorAll('#screen-communities .comm-card').forEach(c => {
+    const okTab = commTab === 'all' || (c.dataset.scope || '').split(' ').includes(commTab);
+    c.style.display = okTab && c.textContent.toLowerCase().includes(commQuery) ? '' : 'none';
+  });
+  ['comm-mine-section', 'comm-explore-section'].forEach(id => {
+    const sec = document.getElementById(id);
+    sec.style.display = Array.from(sec.querySelectorAll('.comm-card')).some(c => c.style.display !== 'none') ? '' : 'none';
+  });
+}
+
+function joinCommunity(card, name) {
+  if (card.dataset.joined) return showToast(`Ya eres miembro de ${name}`);
+  card.dataset.joined = '1';
+  showToast(`Te uniste a ${name}`);
+  card.style.background = 'var(--surface-hover)';
+  card.style.borderColor = 'var(--primary)';
+}
+
+function openCommunity(id) {
+  STATE.currentCommunity = id;
+  const data = STATE.communityData[id];
+  if (!data) return;
+  document.getElementById('comm-detail-name').textContent = data.name;
+  document.getElementById('comm-detail-meta').textContent = `${data.members} miembros · ${data.online} en línea · Ver miembros →`;
+  document.getElementById('comm-detail-desc').textContent = data.desc;
+  renderCommunityTopics();
+  const firstTab = document.querySelector('.comm-tab');
+  if (firstTab) switchCommDetailTab(firstTab, 'temas');
+  goTo('community-detail');
+}
+
+function switchCommDetailTab(btn, tab) {
+  document.querySelectorAll('.comm-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('comm-tab-temas').style.display = tab === 'temas' ? '' : 'none';
+  document.getElementById('comm-tab-miembros').style.display = tab === 'miembros' ? '' : 'none';
+  document.getElementById('comm-tab-info').style.display = tab === 'info' ? '' : 'none';
+
+  if (tab === 'miembros') renderCommunityMembers();
+  if (tab === 'info') renderCommunityInfo();
+}
+
+function renderCommunityTopics() {
+  const data = STATE.communityData[STATE.currentCommunity];
+  if (!data) return;
+  const container = document.getElementById('comm-topics-list');
+  const bColors = { 1:'var(--b1)',2:'var(--b2)',3:'var(--b3)',4:'var(--b4)',5:'var(--b5)',6:'var(--b6)' };
+  const bNames = { 1:'Recordar',2:'Comprender',3:'Aplicar',4:'Analizar',5:'Evaluar',6:'Crear' };
+  const filtered = data.topics.filter(t => STATE.bloomFilters.has(t.bloom));
+  container.innerHTML = filtered.map(t => `
+    <div class="topic-item" data-t="Abre el tema: ${esc(t.title)}" onclick="showToast(this.dataset.t)">
+      <div class="topic-item-name">
+        ${esc(t.title)}
+        <span style="color:var(--primary);">→</span>
+      </div>
+      <div class="topic-item-meta">
+        <span class="bloom-badge" style="background-color:var(--b${t.bloom}-bg);color:${bColors[t.bloom]};">${t.bloom} ${bNames[t.bloom]}</span>
+        · ${t.author} · ${t.time}
+      </div>
+      <div class="topic-item-desc">${esc(t.desc)}</div>
+      <div class="topic-item-stats">${t.replies} respuestas · ${t.participants} participantes</div>
+    </div>`).join('');
+  if (!filtered.length) container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-3);">No hay temas para los filtros seleccionados</div>';
+}
+
+function toggleBloomFilter(btn, level) {
+  btn.classList.toggle('bf-active');
+  if (STATE.bloomFilters.has(level)) STATE.bloomFilters.delete(level);
+  else STATE.bloomFilters.add(level);
+  renderCommunityTopics();
+}
+
+function renderCommunityMembers() {
+  const container = document.getElementById('comm-tab-miembros');
+  const members = [
+    { name:'Lucía Torres', icon:SVGS.user, role:'Compañera', sem:'4.º sem' },
+    { name:'Diego Ruiz', icon:SVGS.user, role:'Compañero', sem:'5.º sem' },
+    { name:'Ana Gómez', icon:SVGS.tutor, role:'Tutora verificada', sem:'6.º sem' },
+    { name:'Carlos Medina', icon:SVGS.user, role:'Compañero', sem:'5.º sem' },
+    { name:'Sofia Herrera', icon:SVGS.tutor, role:'Tutora verificada', sem:'8.º sem' }
+  ];
+  container.innerHTML = members.map(m => `
+    <div class="match-card-home" style="margin-bottom:8px;" onclick="showToast('Ver perfil de ${m.name}')">
+      <div class="match-avatar">${m.icon}</div>
+      <div class="match-info">
+        <div class="match-name">${m.name}</div>
+        <div class="match-sub">${m.role} · ${m.sem}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderCommunityInfo() {
+  const data = STATE.communityData[STATE.currentCommunity];
+  document.getElementById('comm-tab-info').innerHTML = `
+    <div class="card" style="margin-top:4px;">
+      <div style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;">${data.name}</div>
+      <div style="font-size:14px;color:var(--text-2);line-height:1.6;">${data.desc}</div>
+      <div style="margin-top:12px;display:flex;gap:16px;">
+        <div><div style="font-size:18px;font-weight:800;color:var(--primary)">${data.members}</div><div style="font-size:12px;color:var(--text-3)">miembros</div></div>
+        <div><div style="font-size:18px;font-weight:800;color:var(--accent-green)">${data.online}</div><div style="font-size:12px;color:var(--text-3)">en línea</div></div>
+        <div><div style="font-size:18px;font-weight:800;color:var(--text-1)">${data.topics.length}</div><div style="font-size:12px;color:var(--text-3)">temas</div></div>
+      </div>
+    </div>`;
+}
+
+function showPublishTopicModal() {
+  openModal('modal-publish-topic');
+}
+
+function publishTopic() {
+  const title = document.getElementById('new-topic-title').value.trim();
+  const bloomVal = parseInt(document.getElementById('new-topic-bloom').value);
+  const desc = document.getElementById('new-topic-desc').value.trim();
+  if (!title) return showToast('Escribe un título para el tema');
+  const bNames = {1:'Recordar',2:'Comprender',3:'Aplicar',4:'Analizar',5:'Evaluar',6:'Crear'};
+  const data = STATE.communityData[STATE.currentCommunity];
+  if (data) {
+    data.topics.unshift({ id: Date.now(), bloom: bloomVal, title, author:'Tú', time:'Ahora', desc: desc || 'Nuevo tema publicado', replies:0, participants:1 });
+    STATE.bloomFilters.add(bloomVal);
+    const fb = document.querySelectorAll('#bloom-filters .bloom-filter-btn')[bloomVal - 1];
+    if (fb) fb.classList.add('bf-active');
+    ['new-topic-title', 'new-topic-desc'].forEach(i => { document.getElementById(i).value = ''; });
+    closeModal('modal-publish-topic');
+    showToast('Tema publicado');
+    renderCommunityTopics();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LEARNING PATH
+// ═══════════════════════════════════════════════════════════════
+function renderLearningPath() {
+  const container = document.getElementById('lp-body');
+  if (!container) return;
+  container.innerHTML = STATE.bloomLevels.map(level => {
+    const icons = { completed: '✓', current: '●', locked: '○' };
+    const statusColors = { completed: 'var(--accent-green)', current: level.color, locked: 'var(--border)' };
+    return `
+      <div class="bloom-step ${level.status}" onclick="${level.status !== 'locked' ? `activateLevel(${level.num})` : ''}">
+        <div class="bloom-step-num" style="background:${level.status === 'locked' ? 'var(--text-3)' : level.color}">${level.num}</div>
+        <div class="bloom-step-info">
+          <div class="bloom-step-name">${level.name}${level.status === 'current' ? ' · Actual' : ''}</div>
+          <div class="bloom-step-sub">${level.sub}</div>
+        </div>
+        <div class="bloom-step-status" style="background:${statusColors[level.status]};color:#fff;">
+          ${level.status === 'locked' ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' : `<span style="font-size:12px;">${icons[level.status]}</span>`}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function activateLevel(num) {
+  const level = STATE.bloomLevels.find(l => l.num === num);
+  if (level && level.status !== 'locked') {
+    showToast(`Nivel ${num}: ${level.name} · ${level.sub}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CHAT
+// ═══════════════════════════════════════════════════════════════
+let chatFilter = 'all';
+
+function switchChatFilter(btn, type) {
+  document.querySelectorAll('#screen-chats .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  chatFilter = type;
+  renderChatList();
+}
+
+let chatQuery = '';
+function filterChats(query) {
+  chatQuery = query.toLowerCase();
+  renderChatList();
+}
+
+function renderChatList() {
+  const container = document.getElementById('chat-list-body');
+  if (!container) return;
+  const filtered = STATE.chats.filter(c =>
+    (chatFilter === 'all' || c.type === chatFilter) &&
+    (c.name + ' ' + (c.messages[c.messages.length-1]?.text || '')).toLowerCase().includes(chatQuery));
+
+  container.innerHTML = filtered.map(c => `
+    <div class="chat-item" onclick="openChat('${c.id}')">
+      <div class="chat-avatar">
+        ${c.icon}
+        ${c.online ? '<div class="chat-online-indicator"></div>' : ''}
+      </div>
+      <div class="chat-info">
+        <div class="chat-name">${c.name}</div>
+        <div class="chat-preview">${esc(c.messages[c.messages.length-1]?.text || '')}</div>
+      </div>
+      <div class="chat-meta">
+        <span class="chat-time">${c.time}</span>
+        ${c.unread > 0 ? `<span class="chat-unread">${c.unread}</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function openChat(id) {
+  STATE.currentChatId = id;
+  const chat = STATE.chats.find(c => c.id === id);
+  if (!chat) return;
+  document.getElementById('chat-detail-avatar').innerHTML = chat.icon;
+  document.getElementById('chat-detail-name').textContent = chat.name;
+  document.getElementById('chat-detail-status').textContent = (chat.online ? 'En línea' : 'Hace 5 min') + ' · ' + (chat.subject || '');
+  
+  chat.unread = 0;
+  goTo('chat-detail');
+  renderChatDetail();
+}
+
+function renderChatDetail() {
+  const chat = STATE.chats.find(c => c.id === STATE.currentChatId);
+  if (!chat) return;
+  const container = document.getElementById('messages-area');
+  if (!container) return;
+
+  const now = new Date();
+  const dateStr = `Hoy · ${['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][now.getDay()]} ${now.getDate()} de ${['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][now.getMonth()]}`;
+
+  let html = `<div class="msg-date-sep">${dateStr}</div>`;
+  chat.messages.forEach(msg => {
+    html += `
+      <div class="message ${msg.from === 'me' ? 'sent' : 'received'}">
+        <div class="msg-bubble">${esc(msg.text)}</div>
+        <div class="msg-time ${msg.read ? 'read' : ''}">${msg.time}${msg.read ? ' · Leído' : ''}</div>
+      </div>`;
+  });
+
+  if (chat.sessionCard) {
+    html += `
+      <div class="session-embed-card" onclick="goTo('session')" style="max-width:85%;">
+        <div class="session-embed-title">Sesión de estudio · Derivadas</div>
+        <div class="session-embed-meta">Hoy 16:00 · 45 min · 3 Aplicar</div>
+        <div class="session-embed-link">Ver sesión →</div>
+      </div>`;
+  }
+
+  container.innerHTML = html;
+  setTimeout(() => container.scrollTop = container.scrollHeight, 50);
+}
+
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const chat = STATE.chats.find(c => c.id === STATE.currentChatId);
+  if (!chat) return;
+
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  chat.messages.push({ from:'me', text, time:timeStr });
+  chat.time = timeStr;
+  input.value = '';
+  input.style.height = '';
+  renderChatDetail();
+
+  if (chat.id === 'lucia' || chat.id === 'calc1-group') {
+    setTimeout(() => simulateResponse(chat.id), 1800);
+  }
+}
+
+function simulateResponse(chatId) {
+  const chat = STATE.chats.find(c => c.id === chatId);
+  if (!chat) return;
+  const responses = {
+    lucia: ['Claro, ya voy.', 'Sí, lo vi. Ahora entro a la sesión.', '¿Qué ejercicio te está costando más?', 'Perfecto, nos vemos en unos minutos.', 'Excelente, mándame tus dudas.'],
+    'calc1-group': ['Diego: compartí los ejercicios de hoy en el grupo', 'Ana: gracias por compartir.', 'Carlos: ¿alguien más va a la sesión de las 16?', 'Sofia: los ejercicios de la cadena están en el archivo enviado.']
+  };
+  const opts = responses[chatId] || ['Entendido.', 'De acuerdo.'];
+  const text = opts[Math.floor(Math.random() * opts.length)];
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  chat.messages.push({ from:'them', text, time:timeStr });
+  if (STATE.currentScreen === 'chat-detail' && STATE.currentChatId === chatId) {
+    renderChatDetail();
+  } else {
+    chat.unread = (chat.unread || 0) + 1;
+    showToast(`${chat.name}: ${text.substring(0,30)}`);
+  }
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = '';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function startLuciaTyping() {
+  setInterval(() => {
+    const chat = STATE.chats.find(c => c.id === 'lucia');
+    if (!chat) return;
+    const typing = ['¿Pudiste hacer el ejercicio 3?', 'Hola, ¿ya entraste a la sesión?', 'Te mando el apunte ahora.'];
+    const text = typing[Math.floor(Math.random() * typing.length)];
+    const now = new Date();
+    const t = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    chat.messages.push({ from:'them', text, time:t });
+    chat.time = t;
+    if (STATE.currentScreen === 'chat-detail' && STATE.currentChatId === 'lucia') renderChatDetail();
+    else { chat.unread = (chat.unread||0)+1; if (STATE.currentScreen === 'chats') renderChatList(); }
+  }, 45000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STUDY SESSION / TIMER
+// ═══════════════════════════════════════════════════════════════
+function startTimer() {
+  if (STATE.timer.running) return;
+  STATE.timer.running = true;
+  STATE.timer.interval = setInterval(() => {
+    if (!STATE.timer.running) return;
+    STATE.timer.seconds++;
+    updateTimerDisplay();
+    
+    if (STATE.timer.seconds % 30 === 0) {
+      const el = document.getElementById('notes-typing');
+      if (el) {
+        el.textContent = 'Lucía está escribiendo…';
+        setTimeout(() => {
+          const notes = document.getElementById('notes-content');
+          const extras = [' Ejemplo: si f(x)=sin(x²), entonces f\'(x)=2x·cos(x²)', ' Recordar: la función exterior se deriva primero.', ' Nota: identificar la función interior u(x).'];
+          if (notes) notes.textContent += extras[Math.floor(Math.random()*extras.length)];
+          if (el) el.textContent = '';
+        }, 2000);
+      }
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  STATE.timer.running = false;
+  if (STATE.timer.interval) clearInterval(STATE.timer.interval);
+}
+
+function syncTimerUI() {
+  const p = !!STATE.timer.userPaused;
+  const btn = document.getElementById('timer-toggle-btn');
+  btn.classList.toggle('paused', p);
+  document.getElementById('timer-btn-text').textContent = p ? 'Continuar' : 'Pausar';
+  document.getElementById('timer-icon').innerHTML = p
+    ? '<path d="M5 3l14 9-14 9V3z"/>'
+    : '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+}
+
+function enterSession() {
+  renderChecklist();
+  updateTimerDisplay();
+  syncTimerUI();
+  if (!STATE.timer.userPaused) startTimer();
+}
+
+function toggleTimer() {
+  STATE.timer.userPaused = !STATE.timer.userPaused;
+  if (STATE.timer.userPaused) stopTimer(); else startTimer();
+  syncTimerUI();
+}
+
+function dismissSessionEnd() {
+  closeModal('modal-session-end');
+  if (!STATE.timer.userPaused && STATE.currentScreen === 'session') startTimer();
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timer-display');
+  if (!el) return;
+  const m = String(Math.floor(STATE.timer.seconds / 60)).padStart(2,'0');
+  const s = String(STATE.timer.seconds % 60).padStart(2,'0');
+  el.textContent = `${m}:${s}`;
+}
+
+function renderChecklist() {
+  const container = document.getElementById('checklist-items');
+  if (!container) return;
+  container.innerHTML = STATE.checklist.map(item => `
+    <div class="check-item" onclick="toggleCheck(${item.id})">
+      <div class="check-box ${item.done ? 'checked' : ''}">
+        ${item.done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : ''}
+      </div>
+      <span class="check-text ${item.done ? 'done' : ''}">${item.text}</span>
+    </div>`).join('');
+}
+
+function toggleCheck(id) {
+  const item = STATE.checklist.find(c => c.id === id);
+  if (item) { item.done = !item.done; renderChecklist(); }
+}
+
+function editNotes() {
+  const notes = document.getElementById('notes-content');
+  const current = notes.textContent;
+  const newText = prompt('Editar notas compartidas:', current);
+  if (newText !== null) notes.textContent = newText;
+}
+
+function showSessionEndModal() {
+  stopTimer();
+  const m = String(Math.floor(STATE.timer.seconds / 60)).padStart(2,'0');
+  const s = String(STATE.timer.seconds % 60).padStart(2,'0');
+  document.getElementById('end-time').textContent = `${m}:${s}`;
+  const done = STATE.checklist.filter(c => c.done).length;
+  document.getElementById('end-tasks').textContent = `${done}/${STATE.checklist.length}`;
+  openModal('modal-session-end');
+}
+
+function setRating(n) {
+  document.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('active', i < n));
+}
+
+function finishSession() {
+  closeModal('modal-session-end');
+  showToast('¡Sesión guardada! +1 nivel en Aplicar');
+  STATE.timer.seconds = 0;
+  STATE.timer.userPaused = false;
+  updateTimerDisplay();
+  syncTimerUI();
+  setTimeout(() => goTo('home'), 800);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PROGRESS
+// ═══════════════════════════════════════════════════════════════
+let progressPeriod = 'week';
+function renderProgress() {
+  const container = document.getElementById('progress-body');
+  if (!container) return;
+  const bColors = { 1:'var(--b1)',2:'var(--b2)',3:'var(--b3)',4:'var(--b4)',5:'var(--b5)',6:'var(--b6)' };
+  const bNames = { 1:'Recordar',2:'Comprender',3:'Aplicar',4:'Analizar',5:'Evaluar',6:'Crear' };
+  const bData = progressPeriod === 'week' ? [5,4,3,1,0,0] : [12,9,6,3,1,0];
+  const totalH = progressPeriod === 'week' ? '4 h 20 min' : '18 h 40 min';
+  const sessions = progressPeriod === 'week' ? 3 : 12;
+
+  container.innerHTML = `
+    <div class="progress-period">
+      <button class="period-btn ${progressPeriod==='week'?'active':''}" onclick="switchPeriod('week')">Esta semana</button>
+      <button class="period-btn ${progressPeriod==='month'?'active':''}" onclick="switchPeriod('month')">Este mes</button>
+    </div>
+    <div class="stat-card-big">
+      <div><span class="stat-big-num">${totalH.split(' ')[0]}</span><span class="stat-big-unit"> ${totalH.split(' ').slice(1).join(' ')}</span></div>
+      <div class="stat-big-label">Estudio ${progressPeriod==='week'?'semanal':'mensual'} · Meta: ${progressPeriod==='week'?'6 h':'24 h'}</div>
+      <div class="stat-big-meta">↑ ${progressPeriod==='week'?'45 min':'3 h'} más que ${progressPeriod==='week'?'la semana pasada':'el mes pasado'} · ${sessions} sesiones</div>
+    </div>
+    <div class="bloom-progress-section">
+      <div class="bloom-progress-title">Niveles Bloom alcanzados</div>
+      <div class="bloom-progress-sub">Número de temas por nivel · ${bData.reduce((a,b)=>a+b,0)} temas en total</div>
+      ${[1,2,3,4,5,6].map(n => `
+        <div class="bloom-row-progress">
+          <div class="bloom-row-label" style="color:${bColors[n]};font-weight:600;">${n}${bNames[n]}</div>
+          <div class="bloom-bar-wrap"><div class="bloom-bar-fill" style="background:${bColors[n]};width:${bData[n-1] ? (bData[n-1]/Math.max(...bData)*100)+'%' : '4px'}"></div></div>
+          <div class="bloom-row-val" style="color:${bColors[n]};">${bData[n-1]}</div>
+        </div>`).join('')}
+    </div>
+    <div class="badges-section">
+      <div class="badges-title">Insignias · 3 obtenidas</div>
+      <div class="badge-item"><div class="badge-icon">${SVGS.badgeHand}</div><div><div class="badge-name">Primer match</div><div class="badge-desc">Conectaste con tu primer compañero</div></div></div>
+      <div class="badge-item"><div class="badge-icon">${SVGS.badgeCheck}</div><div><div class="badge-name">3 sesiones completadas</div><div class="badge-desc">Completaste tus primeras 3 sesiones</div></div></div>
+      <div class="badge-item"><div class="badge-icon">${SVGS.badgeBook}</div><div><div class="badge-name">Aprendiz constante</div><div class="badge-desc">Estudiaste 3 semanas seguidas</div></div></div>
+    </div>
+    <div class="progress-next-goal"><p>Próximo objetivo: llegar a 4 Analizar en derivadas.</p></div>`;
+}
+
+function switchPeriod(period) {
+  progressPeriod = period;
+  renderProgress();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PROFILE
+// ═══════════════════════════════════════════════════════════════
+function renderProfile() {
+  const container = document.getElementById('profile-body');
+  if (!container) return;
+  const u = STATE.user || { name: 'Orianna Silva', career: 'Ingeniería en Computación', uni: 'UNAM', semester: '3.º semestre', email: 'ori.silva@uni.co' };
+  const name = u.name || 'Orianna Silva';
+
+  container.innerHTML = `
+    <div class="profile-card">
+      <div class="profile-user-row">
+        <div class="profile-avatar">${SVGS.user}</div>
+        <div>
+          <div class="profile-user-name">${esc(name)}</div>
+          <div class="profile-user-sub">${u.career || 'Ingeniería en Computación'} · ${u.uni || 'UNAM'}</div>
+          <div class="profile-user-sem">${u.semester || '3.º semestre'}</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <button class="btn-secondary" onclick="showToast('Editar perfil disponible próximamente')">Editar perfil</button>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-section-label">Materias de interés</div>
+      <div class="tag-list">
+        ${(u.subjects || ['Cálculo I','Álgebra lineal']).map(x => `<span class="chip active">${esc(x)}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div style="margin-bottom:10px;">
+        <div class="profile-section-label">Puedo enseñar</div>
+        <div style="font-size:14px;color:var(--text-2);">${esc((u.teach || ['Límites','Programación']).join(' · '))}</div>
+      </div>
+      <div>
+        <div class="profile-section-label">Quiero aprender</div>
+        <div style="font-size:14px;color:var(--text-2);">${esc((u.learn || ['Derivadas','Matrices']).join(' · '))}</div>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-section-label">Disponibilidad</div>
+      <div style="font-size:14px;color:var(--text-2);">${u.avail || 'Martes y jueves · 16:00–18:00'}</div>
+    </div>
+
+    <div class="profile-stats-row">
+      <div class="profile-stat">
+        <div class="profile-stat-val">4 h</div>
+        <div class="profile-stat-label">esta semana</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-val">3</div>
+        <div class="profile-stat-label">insignias</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-val">2</div>
+        <div class="profile-stat-label">conexiones</div>
+      </div>
+    </div>
+
+    <button class="btn-secondary" onclick="goTo('settings')">Ajustes →</button>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════════════════
+function toggleSetting(el) {
+  el.classList.toggle('on');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════════════════════════
+function openModal(id) {
+  document.getElementById(id)?.classList.add('show');
+}
+function closeModal(id) {
+  document.getElementById(id)?.classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════════
+let toastTimeout;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => el.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
